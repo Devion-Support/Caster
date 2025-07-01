@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    Tema dasar aplikasi.
+    Nama "Theme.Caster" ini yang akan kita gunakan di AndroidManifest.xml.
+    Parent-nya adalah "Theme.Material3.DayNight.NoActionBar" yang dicari oleh sistem build.
+    -->
+    <style name="Theme.Caster" parent="Theme.Material3.DayNight.NoActionBar">
+        <!--
+        Anda bisa mengkustomisasi warna status bar, dll di sini jika perlu,
+        tapi untuk proyek Compose, ini sudah cukup.
+        Contoh:
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        -->
+    </style>
+</resources>
