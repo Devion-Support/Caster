@@ -14,14 +14,49 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Adb
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.Screenshot
+import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,10 +70,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.yoganataa.caster.app.ui.theme.CasterTheme
 import io.github.yoganataa.caster.core.Caster
 import io.github.yoganataa.caster.core.CasterConfig
-import io.github.yoganataa.caster.core.models.*
+import io.github.yoganataa.caster.core.models.CasterResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,7 +82,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CasterTheme {
+            MaterialTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = Color(0xFFF8F9FA)
@@ -69,7 +103,7 @@ data class SecurityUiState(
 )
 
 enum class DialogType {
-    None, Overall, Root, Emulator, FlagSecure, Malicious
+    None, Overall, Root, Emulator, FlagSecure, Malicious, Integrity, Tampering
 }
 
 data class DeviceInfo(
@@ -90,7 +124,11 @@ class SecurityViewModel : ViewModel() {
     fun initializeCaster() {
         if (caster != null) return
         try {
-            caster = Caster(config = CasterConfig())
+            val config = CasterConfig(
+                enableIntegrityChecks = true,
+                enableAntiTampering = true
+            )
+            caster = Caster(config)
         } catch (e: Exception) {
             uiState = uiState.copy(errorMessage = "Initialization Failed: ${e.message}")
         }
@@ -167,6 +205,8 @@ fun CasterScanScreen(viewModel: SecurityViewModel = viewModel()) {
                             onEmulatorClick = { viewModel.showDialog(DialogType.Emulator) },
                             onFlagSecureClick = { viewModel.showDialog(DialogType.FlagSecure) },
                             onMaliciousClick = { viewModel.showDialog(DialogType.Malicious) },
+                            onIntegrityClick = { viewModel.showDialog(DialogType.Integrity) },
+                            onTamperingClick = { viewModel.showDialog(DialogType.Tampering) },
                             onOverallClick = { viewModel.showDialog(DialogType.Overall) }
                         )
                     }
@@ -196,7 +236,9 @@ fun CasterScanScreen(viewModel: SecurityViewModel = viewModel()) {
 @Composable
 private fun ScanningIndicator() {
     Box(
-        modifier = Modifier.fillMaxSize().padding(vertical = 100.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 100.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -214,7 +256,9 @@ private fun ScanningIndicator() {
 @Composable
 private fun WelcomeMessage() {
     Box(
-        modifier = Modifier.fillMaxSize().padding(vertical = 100.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 100.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -250,7 +294,9 @@ private fun ScanButton(
     Button(
         onClick = onScanClick,
         enabled = !uiState.isScanning,
-        modifier = Modifier.fillMaxWidth().height(56.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4)),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -271,6 +317,8 @@ fun ScanResultContent(
     onEmulatorClick: () -> Unit,
     onFlagSecureClick: () -> Unit,
     onMaliciousClick: () -> Unit,
+    onIntegrityClick: () -> Unit,
+    onTamperingClick: () -> Unit,
     onOverallClick: () -> Unit
 ) {
     Column {
@@ -279,7 +327,9 @@ fun ScanResultContent(
             onRootClick = onRootClick,
             onEmulatorClick = onEmulatorClick,
             onFlagSecureClick = onFlagSecureClick,
-            onMaliciousClick = onMaliciousClick
+            onMaliciousClick = onMaliciousClick,
+            onIntegrityClick = onIntegrityClick,
+            onTamperingClick = onTamperingClick
         )
         Spacer(modifier = Modifier.height(20.dp))
         EnhancedDeviceInfoCard(context = context, onOverallClick = onOverallClick)
@@ -292,9 +342,12 @@ fun ScanResultGrid(
     onRootClick: () -> Unit,
     onEmulatorClick: () -> Unit,
     onFlagSecureClick: () -> Unit,
-    onMaliciousClick: () -> Unit
+    onMaliciousClick: () -> Unit,
+    onIntegrityClick: () -> Unit,
+    onTamperingClick: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Baris 1
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -302,38 +355,61 @@ fun ScanResultGrid(
             SecurityCard(
                 title = "Root Status",
                 icon = Icons.Default.Memory,
-                statusText = if (result.rootResult.isRooted) "Detected" else "No",
+                statusText = if (result.rootResult.isRooted) "Detected" else "Clean",
                 isSecure = !result.rootResult.isRooted,
                 onClick = onRootClick,
                 modifier = Modifier.weight(1f)
             )
             SecurityCard(
                 title = "Emulator",
-                icon = Icons.Default.PhoneAndroid,
-                statusText = if (result.emulatorResult.isEmulator) "Detected" else "No",
+                icon = Icons.Default.Adb,
+                statusText = if (result.emulatorResult.isEmulator) "Detected" else "Real",
                 isSecure = !result.emulatorResult.isEmulator,
                 onClick = onEmulatorClick,
                 modifier = Modifier.weight(1f)
             )
         }
+        // Baris 2
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             SecurityCard(
                 title = "Flag Secure",
-                icon = Icons.Default.VerifiedUser,
-                statusText = if (!result.flagSecureResult.isFlagSecureDisabled) "Yes" else "Disabled",
+                icon = Icons.Default.Screenshot,
+                statusText = if (result.flagSecureResult.isFlagSecureDisabled) "Bypassed" else "Protected",
                 isSecure = !result.flagSecureResult.isFlagSecureDisabled,
                 onClick = onFlagSecureClick,
                 modifier = Modifier.weight(1f)
             )
             SecurityCard(
-                title = "Malicious",
+                title = "Malicious Apps",
                 icon = Icons.Default.BugReport,
-                statusText = if (result.maliciousAppsResult.hasMaliciousApps) "Warning" else "Clean",
+                statusText = if (result.maliciousAppsResult.hasMaliciousApps) "Found" else "Clean",
                 isSecure = !result.maliciousAppsResult.hasMaliciousApps,
                 onClick = onMaliciousClick,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        // Baris 3
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            SecurityCard(
+                title = "App Integrity",
+                icon = Icons.Default.Fingerprint,
+                statusText = if (result.integrityResult.isTampered) "Compromised" else "OK",
+                isSecure = !result.integrityResult.isTampered,
+                onClick = onIntegrityClick,
+                modifier = Modifier.weight(1f)
+            )
+            SecurityCard(
+                title = "Anti-Tampering",
+                icon = Icons.Default.PrivacyTip,
+                statusText = if (result.tamperingResult.isDebuggerAttached || result.tamperingResult.isHookingDetected) "Detected" else "OK",
+                isSecure = !result.tamperingResult.isDebuggerAttached && !result.tamperingResult.isHookingDetected,
+                onClick = onTamperingClick,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -357,24 +433,25 @@ fun SecurityCard(
     Card(
         modifier = modifier
             .clickable { onClick() }
-            .aspectRatio(1f),
+            .aspectRatio(4f / 3f),
         colors = CardDefaults.cardColors(containerColor = cardColor),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(vertical = 12.dp, horizontal = 8.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = title,
                 tint = mainIconColor,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(36.dp)
             )
+            Spacer(modifier = Modifier.height(8.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = title,
@@ -404,7 +481,6 @@ fun SecurityCard(
 
 @Composable
 fun EnhancedDeviceInfoCard(context: Context, onOverallClick: () -> Unit) {
-    // PERBAIKAN: Memanggil `getRamInfo` bukan `getDeviceInfo` yang tidak ada.
     val deviceInfo = remember { getRamInfo(context) }
 
     Card(
@@ -426,7 +502,6 @@ fun EnhancedDeviceInfoCard(context: Context, onOverallClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    // PERBAIKAN: Menggunakan properti yang benar dari data class DeviceInfo
                     text = deviceInfo.deviceName,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -467,7 +542,6 @@ fun EnhancedDeviceInfoCard(context: Context, onOverallClick: () -> Unit) {
                 targetValue = deviceInfo.ramUsagePercent / 100f,
                 animationSpec = tween(1000), label = "ramProgress"
             )
-            // PERBAIKAN: Menggunakan lambda untuk parameter progress agar sesuai dengan Material 3
             LinearProgressIndicator(
                 progress = { animatedProgress },
                 modifier = Modifier
@@ -482,7 +556,9 @@ fun EnhancedDeviceInfoCard(context: Context, onOverallClick: () -> Unit) {
 
             OutlinedButton(
                 onClick = onOverallClick,
-                modifier = Modifier.fillMaxWidth().height(50.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6c757d)),
             ) {
@@ -499,7 +575,9 @@ fun EnhancedDeviceInfoCard(context: Context, onOverallClick: () -> Unit) {
 @Composable
 private fun DeviceSpec(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
@@ -517,12 +595,15 @@ private fun DialogHandler(uiState: SecurityUiState, onDismiss: () -> Unit) {
             enter = fadeIn(tween(150)),
             exit = fadeOut(tween(150))
         ) {
+            // [DIPERBAIKI] Memanggil fungsi Composable dialog yang sebenarnya
             when (dialogType) {
                 DialogType.Overall -> OverallResultDialog(result = scanResult, onDismiss = onDismiss)
                 DialogType.Root -> RootStatusDialog(rootResult = scanResult.rootResult, onDismiss = onDismiss)
                 DialogType.Emulator -> EmulatorDetectionDialog(emulatorResult = scanResult.emulatorResult, onDismiss = onDismiss)
                 DialogType.FlagSecure -> FlagSecureDialog(flagSecureResult = scanResult.flagSecureResult, onDismiss = onDismiss)
                 DialogType.Malicious -> MaliciousAppsDialog(maliciousResult = scanResult.maliciousAppsResult, onDismiss = onDismiss)
+                DialogType.Integrity -> IntegrityDialog(integrityResult = scanResult.integrityResult, onDismiss = onDismiss)
+                DialogType.Tampering -> TamperingDialog(tamperingResult = scanResult.tamperingResult, onDismiss = onDismiss)
                 DialogType.None -> {}
             }
         }
@@ -536,7 +617,6 @@ private fun getDeviceName(): String {
     return "$manufacturer $model"
 }
 
-// PERBAIKAN: Nama fungsi diubah menjadi `getRamInfo` agar sesuai dengan pemanggilan
 private fun getRamInfo(context: Context): DeviceInfo {
     val memoryInfo = ActivityManager.MemoryInfo().also {
         (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(it)

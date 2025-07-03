@@ -7,7 +7,9 @@ import io.github.yoganataa.caster.core.logging.ThreatInfo
 import io.github.yoganataa.caster.core.logging.ThreatType
 import io.github.yoganataa.caster.core.utils.FileUtils
 import io.github.yoganataa.caster.core.utils.SystemUtils
+import org.lsposed.lsparanoid.Obfuscate
 
+@Obfuscate
 class KernelSUDetector(private val context: Context) : RootDetectorInterface {
 
     override suspend fun detect(): RootDetectionResult {

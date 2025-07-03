@@ -23,6 +23,8 @@ data class SecurityStatus(
     @SerializedName("is_emulator") val isEmulator: Boolean,
     @SerializedName("flag_secure_disabled") val flagSecureDisabled: Boolean,
     @SerializedName("malicious_apps_detected") val maliciousAppsDetected: Boolean,
+    @SerializedName("is_tampered") val isTampered: Boolean,
+    @SerializedName("is_debugger_attached") val isDebuggerAttached: Boolean,
     @SerializedName("risk_level") val riskLevel: RiskLevel
 )
 
@@ -38,6 +40,8 @@ enum class ThreatType {
     EMULATOR,
     FLAG_SECURE_BYPASS,
     MALICIOUS_APP,
+    TAMPERING,
+    DEBUGGING,
     SUSPICIOUS_ENVIRONMENT
 }
 

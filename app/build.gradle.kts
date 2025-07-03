@@ -53,9 +53,8 @@ android {
         abi {
             isEnable = true
             reset()
-            // Pilih hanya arsitektur yang paling umum untuk mengurangi jumlah file
             include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
-            isUniversalApk = false // Jangan buat satu APK universal yang besar
+            isUniversalApk = false
         }
     }
 }

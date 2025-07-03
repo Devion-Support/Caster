@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.lsparanoid)
+    jacoco
 }
 
 android {
@@ -27,6 +29,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            enableUnitTestCoverage = true
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -34,6 +39,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
     }
 }
 
@@ -48,7 +56,57 @@ dependencies {
     implementation(libs.hiddenapibypass)
 
     // testing
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+tasks.create<JacocoReport>("jacocoTestReport") {
+    group = "Reporting"
+    description = "Generate Jacoco test coverage report for debug build"
+
+    // Menentukan file .exec (hasil data coverage) yang akan digunakan
+    executionData.setFrom(
+        fileTree(buildDir) {
+            include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+        }
+    )
+
+    // Menentukan direktori source code yang akan dianalisis
+    sourceDirectories.setFrom(files("$projectDir/src/main/java"))
+
+    // Menentukan file .class yang telah dikompilasi
+    val kotlinClasses = fileTree("$buildDir/tmp/kotlin-classes/debug") {
+        exclude(
+            // Daftar file yang akan diabaikan dalam laporan coverage
+            "**/R.class",
+            "**/R$*.class",
+            "**/BuildConfig.*",
+            "**/Manifest*.*",
+            "**/*_Args.class",
+            "**/*_Args$*.class",
+            "**/BR.class",
+            "**/*_MembersInjector.class",
+            "**/Dagger*Component.class",
+            "**/Dagger*Component\$Builder.class",
+            "**/*_Factory.class",
+            "**/*_Provide*Factory.class",
+            "**/*_ViewBinding*.*",
+            "**/models/**", // Mengabaikan data class/model
+            "**/logging/**" // Mengabaikan kelas logging
+        )
+    }
+    classDirectories.setFrom(files(kotlinClasses))
+
+    // Mengkonfigurasi output laporan
+    reports {
+        xml.required.set(true)   // Diperlukan untuk integrasi dengan CI/CD tools
+        html.required.set(true)  // Laporan HTML yang mudah dibaca
+        csv.required.set(false)
+    }
 }

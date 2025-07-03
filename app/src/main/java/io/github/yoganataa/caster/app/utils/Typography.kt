@@ -1,4 +1,4 @@
-package io.github.yoganataa.caster.app.ui.theme
+package io.github.yoganataa.caster.app.utils
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

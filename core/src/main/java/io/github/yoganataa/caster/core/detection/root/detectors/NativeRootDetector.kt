@@ -6,10 +6,12 @@ import io.github.yoganataa.caster.core.detection.root.RootDetectorInterface
 import io.github.yoganataa.caster.core.logging.Logger
 import io.github.yoganataa.caster.core.logging.ThreatInfo
 import io.github.yoganataa.caster.core.logging.ThreatType
+import org.lsposed.lsparanoid.Obfuscate
 
 /**
  * PERBAIKAN: Kelas ini di-refactor untuk menggunakan fungsi native dari referensi 'RootBeerFresh'.
  */
+@Obfuscate
 class NativeRootDetector(private val context: Context) : RootDetectorInterface {
     private val logger = Logger.getInstance()
 

@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import io.github.yoganataa.caster.core.logging.Logger
 import io.github.yoganataa.caster.core.logging.ThreatInfo
 import io.github.yoganataa.caster.core.logging.ThreatType
+import org.lsposed.lsparanoid.Obfuscate
 
 /**
  * Mendeteksi aplikasi berbahaya berdasarkan daftar yang diketahui, heuristik nama,
@@ -16,6 +17,8 @@ import io.github.yoganataa.caster.core.logging.ThreatType
  * pustaka ini WAJIB mendeklarasikan izin <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
  * di AndroidManifest.xml-nya.
  */
+
+@Obfuscate
 class MaliciousAppDetector(private val context: Context) {
 
     private val logger = Logger.getInstance()

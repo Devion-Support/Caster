@@ -7,6 +7,7 @@ import io.github.yoganataa.caster.core.logging.ThreatInfo
 import io.github.yoganataa.caster.core.logging.ThreatType
 import io.github.yoganataa.caster.core.utils.FileUtils
 import io.github.yoganataa.caster.core.utils.SystemUtils
+import org.lsposed.lsparanoid.Obfuscate
 
 /**
  * PERBAIKAN: Struktur data class disesuaikan agar konsisten dengan seluruh proyek.
@@ -23,6 +24,8 @@ data class EmulatorResult(
 /**
  * Detector for identifying Android emulator environments, mempertahankan logika skor yang kompleks.
  */
+
+@Obfuscate
 class EmulatorDetector(private val context: Context) {
 
     companion object {

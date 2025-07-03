@@ -1,17 +1,19 @@
-# File ini mendefinisikan semua versi library dan plugin di satu tempat.
-# Ini membuat pembaruan versi menjadi lebih mudah dan konsisten di seluruh modul.
-
 [versions]
 # Versi Plugin
 androidGradlePlugin = "8.11.0"
 coilCompose = "3.2.0"
 kotlin = "2.2.0"
-kotlinCompose = "2.2.0" # Versi plugin compose harus cocok dengan kotlin
-composeCompiler = "1.5.11" # Versi compiler compose yang kompatibel dengan Kotlin 1.9.23
+kotlinCompose = "2.2.0"
+composeCompiler = "1.5.11"
 
 # Versi Android SDK
 compileSdk = "36"
+kotlinxCoroutinesTest = "1.10.2"
 minSdk = "29"
+mockitoCore = "5.18.0"
+mockitoInline = "5.2.0"
+mockitoKotlin = "5.4.0"
+robolectric = "4.15.1"
 targetSdk = "36"
 
 # Versi Library
@@ -48,6 +50,7 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended"}
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 material-v150 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 
 # Coroutines
@@ -56,6 +59,9 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 # Networking & JSON
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
 
@@ -67,6 +73,7 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 # Plugin yang digunakan di level proyek dan modul
@@ -75,3 +82,4 @@ android-library = { id = "com.android.library", version.ref = "androidGradlePlug
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinCompose" }
 maven-publish = { id = "maven-publish" }
+lsparanoid = {id = "org.lsposed.lsparanoid", version = "0.6.0" }

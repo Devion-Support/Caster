@@ -11,6 +11,8 @@ data class CasterConfig(
     val enableFlagSecureDetection: Boolean = true,
     val enableMaliciousAppDetection: Boolean = true,
     val enableNativeChecks: Boolean = true,
+    val enableIntegrityChecks: Boolean = true,
+    val enableAntiTampering: Boolean = true,
     val detectionTimeoutMs: Long = 5000L,
     val enableParallelDetection: Boolean = true,
     val customHeaders: Map<String, String> = emptyMap(),

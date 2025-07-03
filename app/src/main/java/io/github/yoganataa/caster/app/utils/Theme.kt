@@ -1,4 +1,4 @@
-package io.github.yoganataa.caster.app.ui.theme
+package io.github.yoganataa.caster.app.utils
 
 import android.app.Activity
 import android.os.Build

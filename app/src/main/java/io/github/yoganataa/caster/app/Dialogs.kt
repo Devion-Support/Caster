@@ -47,15 +47,15 @@ fun OverallResultDialog(result: CasterResult, onDismiss: () -> Unit) {
                 isSecure = !result.rootResult.isRooted
             )
             OverallResultItem(
-                icon = Icons.Default.PhoneAndroid,
+                icon = Icons.Default.Adb,
                 title = "Emulator",
                 status = if (result.emulatorResult.isEmulator) "Detected" else "No detection",
                 isSecure = !result.emulatorResult.isEmulator
             )
             OverallResultItem(
-                icon = Icons.Default.VerifiedUser,
+                icon = Icons.Default.Screenshot,
                 title = "Flag Secure",
-                status = if (!result.flagSecureResult.isFlagSecureDisabled) "Screen capture is restricted" else "Screen capture is possible",
+                status = if (!result.flagSecureResult.isFlagSecureDisabled) "Screen capture restricted" else "Screen capture possible",
                 isSecure = !result.flagSecureResult.isFlagSecureDisabled
             )
             OverallResultItem(
@@ -63,6 +63,19 @@ fun OverallResultDialog(result: CasterResult, onDismiss: () -> Unit) {
                 title = "Malicious Apps",
                 status = if (result.maliciousAppsResult.hasMaliciousApps) "${result.maliciousAppsResult.detectedApps.size} suspicious app(s) found" else "Clean",
                 isSecure = !result.maliciousAppsResult.hasMaliciousApps
+            )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color(0xFFF0F0F0))
+            OverallResultItem(
+                icon = Icons.Default.Fingerprint,
+                title = "App Integrity",
+                status = if (result.integrityResult.isTampered) "Compromised" else "Verified",
+                isSecure = !result.integrityResult.isTampered
+            )
+            OverallResultItem(
+                icon = Icons.Default.PrivacyTip,
+                title = "Anti-Tampering",
+                status = if (result.tamperingResult.isDebuggerAttached || result.tamperingResult.isHookingDetected) "Tampering Detected" else "Secure",
+                isSecure = !result.tamperingResult.isDebuggerAttached && !result.tamperingResult.isHookingDetected
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -87,13 +100,13 @@ fun RootStatusDialog(rootResult: RootResult, onDismiss: () -> Unit) {
 
 @Composable
 fun EmulatorDetectionDialog(emulatorResult: EmulatorResult, onDismiss: () -> Unit) {
-    BaseDialog(title = "EMULATOR DETECTION", icon = Icons.Default.Gamepad, onDismiss = onDismiss, isSecure = !emulatorResult.isEmulator) {
+    BaseDialog(title = "EMULATOR DETECTION", icon = Icons.Default.Adb, onDismiss = onDismiss, isSecure = !emulatorResult.isEmulator) {
         InfoRow(label = "Detected:", value = if (emulatorResult.isEmulator) "Yes" else "No", isWarning = emulatorResult.isEmulator)
         if (emulatorResult.isEmulator) {
             InfoRow(label = "Confidence:", value = "${(emulatorResult.confidence * 100).toInt()}%", isWarning = true)
             InfoRow(
                 label = "Indicators:",
-                value = "${emulatorResult.detectedMethods.size} found",
+                value = emulatorResult.detectedMethods.joinToString("\n").ifEmpty { "N/A" },
                 isWarning = true
             )
         }
@@ -102,7 +115,7 @@ fun EmulatorDetectionDialog(emulatorResult: EmulatorResult, onDismiss: () -> Uni
 
 @Composable
 fun FlagSecureDialog(flagSecureResult: FlagSecureResult, onDismiss: () -> Unit) {
-    BaseDialog(title = "FLAG SECURE", icon = Icons.Default.VerifiedUser, onDismiss = onDismiss, isSecure = !flagSecureResult.isFlagSecureDisabled) {
+    BaseDialog(title = "FLAG SECURE", icon = Icons.Default.Screenshot, onDismiss = onDismiss, isSecure = !flagSecureResult.isFlagSecureDisabled) {
         InfoRow(label = "Protected:", value = if (!flagSecureResult.isFlagSecureDisabled) "Yes" else "No (Bypassed!)", isWarning = flagSecureResult.isFlagSecureDisabled)
         if (flagSecureResult.isFlagSecureDisabled) {
             InfoRow(label = "Bypass Method:", value = flagSecureResult.detectionMethods.joinToString("\n").ifEmpty { "N/A" }, isWarning = true)
@@ -127,6 +140,51 @@ fun MaliciousAppsDialog(maliciousResult: MaliciousAppsResult, onDismiss: () -> U
     }
 }
 
+@Composable
+fun IntegrityDialog(integrityResult: IntegrityResult, onDismiss: () -> Unit) {
+    BaseDialog(title = "APP INTEGRITY", icon = Icons.Default.Fingerprint, onDismiss = onDismiss, isSecure = !integrityResult.isTampered) {
+        InfoRow(label = "Status:", value = if (integrityResult.isTampered) "Compromised" else "Verified", isWarning = integrityResult.isTampered)
+        if (integrityResult.isTampered) {
+            InfoRow(
+                label = "Reasons:",
+                value = integrityResult.threats.joinToString("\n").ifEmpty { "Unknown" },
+                isWarning = true
+            )
+        } else {
+            InfoRow(label = "Details:", value = "APK signature and code are valid.")
+        }
+    }
+}
+
+@Composable
+fun TamperingDialog(tamperingResult: TamperingResult, onDismiss: () -> Unit) {
+    val isSecure = !tamperingResult.isDebuggerAttached && !tamperingResult.isHookingDetected
+    BaseDialog(title = "ANTI-TAMPERING", icon = Icons.Default.PrivacyTip, onDismiss = onDismiss, isSecure = isSecure) {
+        InfoRow(
+            label = "Debugger Attached:",
+            value = if (tamperingResult.isDebuggerAttached) "Yes" else "No",
+            isWarning = tamperingResult.isDebuggerAttached
+        )
+        InfoRow(
+            label = "Hooking Detected:",
+            value = if (tamperingResult.isHookingDetected) "Yes" else "No",
+            isWarning = tamperingResult.isHookingDetected
+        )
+        InfoRow(
+            label = "Frida Server:",
+            value = if (tamperingResult.isFridaServerRunning) "Detected" else "Not Found",
+            isWarning = tamperingResult.isFridaServerRunning
+        )
+        if (!isSecure) {
+            InfoRow(
+                label = "Methods:",
+                value = tamperingResult.detectedMethods.joinToString("\n").ifEmpty { "N/A" },
+                isWarning = true
+            )
+        }
+    }
+}
+
 // ===== Komponen UI Pendukung untuk Dialog =====
 
 @Composable
@@ -135,7 +193,6 @@ private fun BaseDialog(
     icon: ImageVector? = null,
     onDismiss: () -> Unit,
     isSecure: Boolean = true,
-    // PERBAIKAN: Menambahkan parameter content yang hilang, ini memperbaiki 3 error sekaligus.
     content: @Composable ColumnScope.() -> Unit
 ) {
     Dialog(
@@ -148,7 +205,9 @@ private fun BaseDialog(
             exit = fadeOut(tween(200)) + scaleOut(tween(200), targetScale = 0.9f)
         ) {
             Card(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -171,15 +230,16 @@ private fun BaseDialog(
                             color = Color(0xFF2E3A47)
                         )
                     }
-                    // PERBAIKAN: Mengganti Divider dengan HorizontalDivider yang tidak deprecated.
                     HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = Color(0xFFF0F0F0))
 
-                    content() // PERBAIKAN: Memanggil content lambda di sini
+                    content()
 
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
                         onClick = onDismiss,
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4)),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -222,11 +282,9 @@ fun MaliciousAppItem(packageName: String, appName: String, riskLevel: String) {
         }
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
-        // PERBAIKAN: Menggunakan AsyncImage untuk Coil v3
         AsyncImage(
             model = appIcon,
             contentDescription = "$appName icon",
-            // Fallback jika ikon tidak ditemukan, tampilkan bug report
             error = rememberVectorPainter(image = Icons.Default.BugReport),
             modifier = Modifier
                 .size(40.dp)
@@ -282,10 +340,12 @@ fun ScoreIndicator(score: Int) {
             Text(text = "$score $scoreText", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = scoreColor)
         }
         Spacer(modifier = Modifier.height(8.dp))
-        // PERBAIKAN: Menggunakan lambda untuk parameter progress
         LinearProgressIndicator(
             progress = { score / 100f },
-            modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(RoundedCornerShape(4.dp)),
             color = scoreColor,
             trackColor = scoreColor.copy(alpha = 0.2f)
         )
@@ -294,10 +354,14 @@ fun ScoreIndicator(score: Int) {
 
 private fun calculateSecurityScore(result: CasterResult): Int {
     var score = 100
-    if (result.rootResult.isRooted) score -= 30
-    if (result.emulatorResult.isEmulator) score -= 20
-    if (result.flagSecureResult.isFlagSecureDisabled) score -= 30
+    if (result.rootResult.isRooted) score -= 25
+    if (result.emulatorResult.isEmulator) score -= 15
+    if (result.flagSecureResult.isFlagSecureDisabled) score -= 20
     if (result.maliciousAppsResult.hasMaliciousApps) score -= (result.maliciousAppsResult.detectedApps.size * 20)
+    if (result.integrityResult.isTampered) score -= 40
+    if (result.tamperingResult.isHookingDetected) score -= 40
+    if (result.tamperingResult.isDebuggerAttached) score -= 25
+
     return score.coerceIn(0, 100)
 }
 

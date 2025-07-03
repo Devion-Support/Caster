@@ -22,10 +22,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.lsposed.hiddenapibypass.HiddenApiBypass
+import org.lsposed.lsparanoid.Obfuscate
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
+@Obfuscate
 class FlagSecureDetector(
     private val activity: Activity
 ) {
