@@ -9,7 +9,12 @@ import io.github.yoganataa.caster.core.logging.ThreatType
 import org.lsposed.lsparanoid.Obfuscate
 
 /**
- * PERBAIKAN: Kelas ini di-refactor untuk menggunakan fungsi native dari referensi 'RootBeerFresh'.
+ * Detector for native root detection methods.
+ *
+ * This class leverages native code (JNI) to perform checks that are harder to bypass
+ * from user-space, such as checking for `su` binaries and Magisk Unix Domain Socket.
+ *
+ * @param context The application context.
  */
 @Obfuscate
 class NativeRootDetector(private val context: Context) : RootDetectorInterface {
@@ -17,7 +22,7 @@ class NativeRootDetector(private val context: Context) : RootDetectorInterface {
 
     companion object {
         private var libraryLoaded = false
-        // Daftar path yang umum digunakan untuk biner 'su' dan 'busybox'
+        // Common paths for 'su' and 'busybox' binaries.
         private val suPaths = arrayOf(
             "/sbin/su", "/system/bin/su", "/system/xbin/su", "/data/local/xbin/su",
             "/data/local/bin/su", "/system/sd/xbin/su", "/system/bin/failsafe/su",
@@ -26,7 +31,7 @@ class NativeRootDetector(private val context: Context) : RootDetectorInterface {
 
         init {
             try {
-                // Memuat library native 'toolChecker' sesuai CMakeLists.txt
+                // Load the native 'toolChecker' library as defined in CMakeLists.txt.
                 System.loadLibrary("toolChecker")
                 libraryLoaded = true
             } catch (e: UnsatisfiedLinkError) {
@@ -35,11 +40,20 @@ class NativeRootDetector(private val context: Context) : RootDetectorInterface {
         }
     }
 
-    // Deklarasi fungsi native yang sesuai dengan toolChecker.cpp yang sudah disesuaikan
+    // Native function declarations corresponding to the custom toolChecker.cpp.
     private external fun checkForRoot(paths: Array<String>): Int
     private external fun checkForMagiskUDS(): Int
     private external fun setLogDebugMessages(enable: Boolean): Int
 
+    /**
+     * Performs native root detection checks.
+     *
+     * This method checks for:
+     * - The presence of `su` binaries in common paths.
+     * - The existence of Magisk Unix Domain Socket.
+     *
+     * @return A [RootDetectionResult] indicating whether root is detected via native methods.
+     */
     override suspend fun detect(): RootDetectionResult {
         if (!libraryLoaded) {
             logger.warn("Native library not loaded, skipping native root detection.")
@@ -50,10 +64,10 @@ class NativeRootDetector(private val context: Context) : RootDetectorInterface {
         val threats = mutableListOf<ThreatInfo>()
 
         try {
-            // Mengaktifkan log dari C++ jika perlu
+            // Enable logging from C++ if needed.
             setLogDebugMessages(true)
 
-            // 1. Memeriksa biner 'su' menggunakan path yang sudah ditentukan
+            // 1. Check for 'su' binaries using predefined paths.
             if (checkForRoot(suPaths) == 1) {
                 val sign = "Native check found 'su' binary in common paths"
                 detectedMethods.add(sign)
@@ -64,7 +78,7 @@ class NativeRootDetector(private val context: Context) : RootDetectorInterface {
                 ))
             }
 
-            // 2. Memeriksa Magisk Unix Domain Socket
+            // 2. Check for Magisk Unix Domain Socket.
             if (checkForMagiskUDS() == 1) {
                 val sign = "Native check detected Magisk Unix Domain Socket"
                 detectedMethods.add(sign)
@@ -89,12 +103,18 @@ class NativeRootDetector(private val context: Context) : RootDetectorInterface {
         )
     }
 
+    /**
+     * Calculates the confidence score based on the number of native root detection methods triggered.
+     *
+     * @param detectionCount The number of native detection methods that returned true.
+     * @return A float value (0.0 to 1.0) representing the confidence score.
+     */
     private fun calculateConfidence(detectionCount: Int): Float {
-        // Skor confidence disesuaikan dengan metode deteksi yang baru
+        // Confidence score adjusted for the new detection methods.
         return when (detectionCount) {
             0 -> 0f
-            1 -> 0.7f // Satu metode terdeteksi sudah cukup kuat
-            else -> 1.0f // Lebih dari satu sangat meyakinkan
+            1 -> 0.7f // One detected method is already quite strong.
+            else -> 1.0f // More than one is very convincing.
         }
     }
 }

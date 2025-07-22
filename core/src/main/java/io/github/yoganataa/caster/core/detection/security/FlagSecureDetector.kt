@@ -27,6 +27,14 @@ import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
+/**
+ * Detector for identifying bypasses of `WindowManager.LayoutParams.FLAG_SECURE`.
+ *
+ * This class attempts to detect if screen content protected by `FLAG_SECURE` can be captured
+ * or bypassed using various techniques, including hidden API calls and virtual display creation.
+ *
+ * @param activity The current [Activity] context, required for accessing window and display services.
+ */
 @Obfuscate
 class FlagSecureDetector(
     private val activity: Activity
@@ -39,6 +47,8 @@ class FlagSecureDetector(
         private const val VIRTUAL_DISPLAY_SIZE = 10
 
         init {
+            // Attempt to set Hidden API exemptions for Android P and above.
+            // This is necessary for some detection methods that rely on internal APIs.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 kotlin.runCatching {
                     HiddenApiBypass.setHiddenApiExemptions("")
@@ -49,6 +59,14 @@ class FlagSecureDetector(
         }
     }
 
+    /**
+     * Represents the result of the FLAG_SECURE bypass detection.
+     *
+     * @property isFlagSecureDisabled True if a FLAG_SECURE bypass is detected, false otherwise.
+     * @property detectionMethods A list of strings indicating the specific methods or signs that led to the detection.
+     * @property threats A list of [ThreatInfo] objects, providing detailed threat information.
+     * @property confidence A float value (0.0 to 1.0) indicating the confidence level of the detection.
+     */
     data class FlagSecureResult(
         val isFlagSecureDisabled: Boolean,
         val detectionMethods: List<String>,
@@ -56,12 +74,21 @@ class FlagSecureDetector(
         val confidence: Float
     )
 
+    /**
+     * Performs detection for `FLAG_SECURE` bypasses.
+     *
+     * This method attempts to capture the screen content using hidden APIs and virtual displays.
+     * If successful, it indicates a potential bypass of `FLAG_SECURE`.
+     *
+     * @return A [FlagSecureResult] object indicating whether a bypass was detected.
+     */
     suspend fun detectFlagSecureBypass(): FlagSecureResult = withContext(Dispatchers.Main) {
         val detectedMethods = mutableListOf<String>()
         val threats = mutableListOf<ThreatInfo>()
 
         logger.debug("Starting advanced FLAG_SECURE bypass detection...")
 
+        // Attempt detection using hidden APIs (e.g., SurfaceControl.captureLayers)
         if (detectWithHiddenAPIs()) {
             val sign = "Hidden API Surface Capture"
             detectedMethods.add(sign)
@@ -73,6 +100,7 @@ class FlagSecureDetector(
             ))
         }
 
+        // If no bypass detected yet, attempt detection using virtual display creation
         if (detectedMethods.isEmpty() && detectWithVirtualDisplay()) {
             val sign = "Virtual Display Capture"
             detectedMethods.add(sign)
@@ -99,6 +127,14 @@ class FlagSecureDetector(
         )
     }
 
+    /**
+     * Attempts to detect FLAG_SECURE bypass using hidden Android APIs.
+     *
+     * This method leverages reflection and `HiddenApiBypass` to call internal system methods
+     * that might allow capturing protected screen content.
+     *
+     * @return True if the hidden API capture is successful, false otherwise.
+     */
     @SuppressLint("PrivateApi")
     private fun detectWithHiddenAPIs(): Boolean {
         return try {
@@ -137,14 +173,19 @@ class FlagSecureDetector(
         }
     }
 
+    /**
+     * Attempts to detect FLAG_SECURE bypass by creating a virtual display and capturing its content.
+     *
+     * If a virtual display can successfully capture content from a secure window, it indicates
+     * a potential bypass.
+     *
+     * @return True if the virtual display capture is successful, false otherwise.
+     */
     @SuppressLint("WrongConstant")
     private suspend fun detectWithVirtualDisplay(): Boolean = suspendCancellableCoroutine { continuation ->
-        // =================================================================
-        // PERBAIKAN: Menggunakan AtomicBoolean untuk mencegah race condition.
-        // PENJELASAN: Ini memastikan `continuation.resume` hanya dipanggil
-        // satu kali, baik oleh listener maupun oleh timeout, mana saja
-        // yang lebih dulu, sehingga mencegah crash.
-        // =================================================================
+        // Using AtomicBoolean to prevent race conditions.
+        // This ensures `continuation.resume` is called only once, either by the listener or by the timeout,
+        // whichever comes first, preventing crashes.
         val continuationResumed = AtomicBoolean(false)
 
         val handler = Handler(Looper.getMainLooper())

@@ -1,0 +1,111 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun EmulatorDetectionDialog(emulatorResult: EmulatorResult, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun FlagSecureDialog(flagSecureResult: FlagSecureResult, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun InfoRow(label: String, value: String, isWarning: Boolean = false)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun IntegrityDialog(integrityResult: IntegrityResult, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun MaliciousAppItem(packageName: String, appName: String, riskLevel: String)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun MaliciousAppsDialog(maliciousResult: MaliciousAppsResult, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun OverallResultDialog(result: CasterResult, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun OverallResultItem(icon: ImageVector, title: String, status: String, isSecure: Boolean)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun RootStatusDialog(rootResult: RootResult, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun ScoreIndicator(score: Int)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable fun TamperingDialog(tamperingResult: TamperingResult, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:Dialogs.kt$@Composable private fun BaseDialog( title: String, icon: ImageVector? = null, onDismiss: () -&gt; Unit, isSecure: Boolean = true, content: @Composable ColumnScope.() -&gt; Unit )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable fun CasterScanScreen(viewModel: SecurityViewModel = viewModel())</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable fun EnhancedDeviceInfoCard(context: Context, onOverallClick: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable fun ScanResultContent( result: CasterResult, context: Context, onRootClick: () -&gt; Unit, onEmulatorClick: () -&gt; Unit, onFlagSecureClick: () -&gt; Unit, onMaliciousClick: () -&gt; Unit, onIntegrityClick: () -&gt; Unit, onTamperingClick: () -&gt; Unit, onOverallClick: () -&gt; Unit )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable fun ScanResultGrid( result: CasterResult, onRootClick: () -&gt; Unit, onEmulatorClick: () -&gt; Unit, onFlagSecureClick: () -&gt; Unit, onMaliciousClick: () -&gt; Unit, onIntegrityClick: () -&gt; Unit, onTamperingClick: () -&gt; Unit )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable fun SecurityCard( title: String, icon: ImageVector, statusText: String, isSecure: Boolean, onClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun DeviceSpec(label: String, value: String)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun DialogHandler(uiState: SecurityUiState, onDismiss: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun ErrorCard(errorMessage: String)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun ScanButton( uiState: SecurityUiState, onScanClick: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun ScanningIndicator()</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun WelcomeMessage()</ID>
+    <ID>FunctionNaming:Theme.kt$@Composable fun CasterTheme( darkTheme: Boolean = isSystemInDarkTheme(), dynamicColor: Boolean = true, content: @Composable () -&gt; Unit )</ID>
+    <ID>ImplicitDefaultLocale:MainActivity.kt$String.format("%.1f", totalMemory / (1024.0 * 1024.0 * 1024.0))</ID>
+    <ID>LongMethod:MainActivity.kt$@Composable fun CasterScanScreen(viewModel: SecurityViewModel = viewModel())</ID>
+    <ID>LongMethod:MainActivity.kt$@Composable fun EnhancedDeviceInfoCard(context: Context, onOverallClick: () -&gt; Unit)</ID>
+    <ID>LongMethod:MainActivity.kt$@Composable fun ScanResultGrid( result: CasterResult, onRootClick: () -&gt; Unit, onEmulatorClick: () -&gt; Unit, onFlagSecureClick: () -&gt; Unit, onMaliciousClick: () -&gt; Unit, onIntegrityClick: () -&gt; Unit, onTamperingClick: () -&gt; Unit )</ID>
+    <ID>LongParameterList:MainActivity.kt$( result: CasterResult, context: Context, onRootClick: () -&gt; Unit, onEmulatorClick: () -&gt; Unit, onFlagSecureClick: () -&gt; Unit, onMaliciousClick: () -&gt; Unit, onIntegrityClick: () -&gt; Unit, onTamperingClick: () -&gt; Unit, onOverallClick: () -&gt; Unit )</ID>
+    <ID>LongParameterList:MainActivity.kt$( result: CasterResult, onRootClick: () -&gt; Unit, onEmulatorClick: () -&gt; Unit, onFlagSecureClick: () -&gt; Unit, onMaliciousClick: () -&gt; Unit, onIntegrityClick: () -&gt; Unit, onTamperingClick: () -&gt; Unit )</ID>
+    <ID>LongParameterList:MainActivity.kt$( title: String, icon: ImageVector, statusText: String, isSecure: Boolean, onClick: () -&gt; Unit, modifier: Modifier = Modifier )</ID>
+    <ID>MagicNumber:Color.kt$0xFF625b71</ID>
+    <ID>MagicNumber:Color.kt$0xFF6650a4</ID>
+    <ID>MagicNumber:Color.kt$0xFF7D5260</ID>
+    <ID>MagicNumber:Color.kt$0xFFCCC2DC</ID>
+    <ID>MagicNumber:Color.kt$0xFFD0BCFF</ID>
+    <ID>MagicNumber:Color.kt$0xFFEFB8C8</ID>
+    <ID>MagicNumber:Dialogs.kt$0.4f</ID>
+    <ID>MagicNumber:Dialogs.kt$0.6f</ID>
+    <ID>MagicNumber:Dialogs.kt$0xFF2E3A47</ID>
+    <ID>MagicNumber:Dialogs.kt$0xFF388E3C</ID>
+    <ID>MagicNumber:Dialogs.kt$0xFF4285F4</ID>
+    <ID>MagicNumber:Dialogs.kt$0xFFD32F2F</ID>
+    <ID>MagicNumber:Dialogs.kt$0xFFF0F0F0</ID>
+    <ID>MagicNumber:Dialogs.kt$0xFFFBC02D</ID>
+    <ID>MagicNumber:Dialogs.kt$0xFFFF9800</ID>
+    <ID>MagicNumber:Dialogs.kt$100</ID>
+    <ID>MagicNumber:Dialogs.kt$15</ID>
+    <ID>MagicNumber:Dialogs.kt$20</ID>
+    <ID>MagicNumber:Dialogs.kt$200</ID>
+    <ID>MagicNumber:Dialogs.kt$25</ID>
+    <ID>MagicNumber:Dialogs.kt$300</ID>
+    <ID>MagicNumber:Dialogs.kt$40</ID>
+    <ID>MagicNumber:Dialogs.kt$60</ID>
+    <ID>MagicNumber:Dialogs.kt$80</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFF1A1A1A</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFF2E3A47</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFF4285F4</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFF4CAF50</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFF5F6368</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFF666666</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFF6c757d</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFFD32F2F</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFFE0E0E0</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFFF8F9FA</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFFFF9800</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFFFFEBEE</ID>
+    <ID>MagicNumber:MainActivity.kt$100</ID>
+    <ID>MagicNumber:MainActivity.kt$1000</ID>
+    <ID>MagicNumber:MainActivity.kt$1024.0</ID>
+    <ID>MagicNumber:MainActivity.kt$150</ID>
+    <ID>MagicNumber:MainActivity.kt$3f</ID>
+    <ID>MagicNumber:MainActivity.kt$4f</ID>
+    <ID>MagicNumber:MainActivity.kt$70</ID>
+    <ID>MagicNumber:MainActivity.kt$90</ID>
+    <ID>MagicNumber:MainActivity.kt$MainActivity$0xFFF8F9FA</ID>
+    <ID>MaxLineLength:Dialogs.kt$BaseDialog</ID>
+    <ID>MaxLineLength:Dialogs.kt$Icon(imageVector = icon, contentDescription = title, tint = iconColor, modifier = Modifier.size(24.dp))</ID>
+    <ID>MaxLineLength:Dialogs.kt$InfoRow(label = "Bypass Method:", value = flagSecureResult.detectionMethods.joinToString("\n").ifEmpty { "N/A" }, isWarning = true)</ID>
+    <ID>MaxLineLength:Dialogs.kt$InfoRow(label = "Detected:", value = if (emulatorResult.isEmulator) "Yes" else "No", isWarning = emulatorResult.isEmulator)</ID>
+    <ID>MaxLineLength:Dialogs.kt$InfoRow(label = "Protected:", value = if (!flagSecureResult.isFlagSecureDisabled) "Yes" else "No (Bypassed!)", isWarning = flagSecureResult.isFlagSecureDisabled)</ID>
+    <ID>MaxLineLength:Dialogs.kt$InfoRow(label = "Status:", value = if (integrityResult.isTampered) "Compromised" else "Verified", isWarning = integrityResult.isTampered)</ID>
+    <ID>MaxLineLength:Dialogs.kt$status = if (!result.flagSecureResult.isFlagSecureDisabled) "Screen capture restricted" else "Screen capture possible"</ID>
+    <ID>MaxLineLength:Dialogs.kt$status = if (result.maliciousAppsResult.hasMaliciousApps) "${result.maliciousAppsResult.detectedApps.size} suspicious app(s) found" else "Clean"</ID>
+    <ID>MaxLineLength:Dialogs.kt$status = if (result.rootResult.isRooted) result.rootResult.detectedMethods.firstOrNull()?.replaceFirstChar { it.uppercase() } ?: "Detected" else "No detection"</ID>
+    <ID>MaxLineLength:Dialogs.kt$status = if (result.tamperingResult.isDebuggerAttached || result.tamperingResult.isHookingDetected) "Tampering Detected" else "Secure"</ID>
+    <ID>MaxLineLength:MainActivity.kt$DialogType.Emulator -&gt; EmulatorDetectionDialog(emulatorResult = scanResult.emulatorResult, onDismiss = onDismiss)</ID>
+    <ID>MaxLineLength:MainActivity.kt$DialogType.FlagSecure -&gt; FlagSecureDialog(flagSecureResult = scanResult.flagSecureResult, onDismiss = onDismiss)</ID>
+    <ID>MaxLineLength:MainActivity.kt$DialogType.Integrity -&gt; IntegrityDialog(integrityResult = scanResult.integrityResult, onDismiss = onDismiss)</ID>
+    <ID>MaxLineLength:MainActivity.kt$DialogType.Malicious -&gt; MaliciousAppsDialog(maliciousResult = scanResult.maliciousAppsResult, onDismiss = onDismiss)</ID>
+    <ID>MaxLineLength:MainActivity.kt$DialogType.Tampering -&gt; TamperingDialog(tamperingResult = scanResult.tamperingResult, onDismiss = onDismiss)</ID>
+    <ID>MaxLineLength:MainActivity.kt$Text(text = value, fontSize = 14.sp, color = Color(0xFF2E3A47), fontWeight = FontWeight.SemiBold, textAlign = TextAlign.End)</ID>
+    <ID>MaxLineLength:MainActivity.kt$statusText = if (result.tamperingResult.isDebuggerAttached || result.tamperingResult.isHookingDetected) "Detected" else "OK"</ID>
+    <ID>NewLineAtEndOfFile:Dialogs.kt$io.github.yoganataa.caster.app.Dialogs.kt</ID>
+    <ID>NewLineAtEndOfFile:ExampleUnitTest.kt$io.github.yoganataa.caster.app.ExampleUnitTest.kt</ID>
+    <ID>NewLineAtEndOfFile:MainActivity.kt$io.github.yoganataa.caster.app.MainActivity.kt</ID>
+    <ID>SwallowedException:Dialogs.kt$e: PackageManager.NameNotFoundException</ID>
+    <ID>TooGenericExceptionCaught:MainActivity.kt$SecurityViewModel$e: Exception</ID>
+    <ID>TooManyFunctions:Dialogs.kt$io.github.yoganataa.caster.app.Dialogs.kt</ID>
+    <ID>TooManyFunctions:MainActivity.kt$io.github.yoganataa.caster.app.MainActivity.kt</ID>
+    <ID>WildcardImport:Dialogs.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:Dialogs.kt$import androidx.compose.material.icons.filled.*</ID>
+    <ID>WildcardImport:Dialogs.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:Dialogs.kt$import io.github.yoganataa.caster.core.models.*</ID>
+    <ID>WildcardImport:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

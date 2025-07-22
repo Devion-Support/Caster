@@ -9,9 +9,28 @@ import io.github.yoganataa.caster.core.utils.FileUtils
 import io.github.yoganataa.caster.core.utils.SystemUtils
 import org.lsposed.lsparanoid.Obfuscate
 
+/**
+ * Detector for identifying SuperSU root solution.
+ *
+ * This detector checks for the presence of SuperSU-specific binaries, installed packages,
+ * and system files commonly associated with SuperSU.
+ *
+ * @param context The application context.
+ */
 @Obfuscate
 class SuperSUDetector(private val context: Context) : RootDetectorInterface {
 
+    /**
+     * Performs the detection for SuperSU.
+     *
+     * Checks include:
+     * - Presence of common `su` binaries.
+     * - Installation of known SuperSU applications.
+     * - Presence of SuperSU-specific system files.
+     * - Ability to execute `su` commands successfully.
+     *
+     * @return A [RootDetectionResult] indicating whether SuperSU is detected and by which methods.
+     */
     override suspend fun detect(): RootDetectionResult {
         val detectedMethods = mutableListOf<String>()
         val threats = mutableListOf<ThreatInfo>()
@@ -28,7 +47,7 @@ class SuperSUDetector(private val context: Context) : RootDetectorInterface {
             ))
         }
 
-        // Check for SuperSU apps
+        // Check for SuperSU app packages
         val superSuPackages = listOf(
             "eu.chainfire.supersu",
             "com.noshufou.android.su",
@@ -88,6 +107,12 @@ class SuperSUDetector(private val context: Context) : RootDetectorInterface {
         )
     }
 
+    /**
+     * Calculates the confidence score based on the number of SuperSU detection methods triggered.
+     *
+     * @param detectionCount The number of SuperSU detection methods that returned true.
+     * @return A float value (0.0 to 1.0) representing the confidence score.
+     */
     private fun calculateConfidence(detectionCount: Int): Float {
         return when (detectionCount) {
             0 -> 0f

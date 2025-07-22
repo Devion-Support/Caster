@@ -42,7 +42,9 @@ enum class ThreatType {
     MALICIOUS_APP,
     TAMPERING,
     DEBUGGING,
-    SUSPICIOUS_ENVIRONMENT
+    SUSPICIOUS_ENVIRONMENT,
+    CONFIGURATION_ERROR,
+    RUNTIME_ERROR
 }
 
 enum class RiskLevel {

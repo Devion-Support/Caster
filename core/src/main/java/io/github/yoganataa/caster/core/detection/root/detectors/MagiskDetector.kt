@@ -9,9 +9,28 @@ import io.github.yoganataa.caster.core.utils.FileUtils
 import io.github.yoganataa.caster.core.utils.SystemUtils
 import org.lsposed.lsparanoid.Obfuscate
 
+/**
+ * Detector for identifying Magisk root solution.
+ *
+ * This detector checks for the presence of Magisk-specific files, installed packages,
+ * system properties, and utilities commonly associated with Magisk.
+ *
+ * @param context The application context.
+ */
 @Obfuscate
 class MagiskDetector(private val context: Context) : RootDetectorInterface {
 
+    /**
+     * Performs the detection for Magisk.
+     *
+     * Checks include:
+     * - Presence of Magisk-specific files.
+     * - Installation of known Magisk applications.
+     * - Magisk-specific system properties.
+     * - Presence of `resetprop` utility.
+     *
+     * @return A [RootDetectionResult] indicating whether Magisk is detected and by which methods.
+     */
     override suspend fun detect(): RootDetectionResult {
         val detectedMethods = mutableListOf<String>()
         val threats = mutableListOf<ThreatInfo>()
@@ -28,7 +47,7 @@ class MagiskDetector(private val context: Context) : RootDetectorInterface {
             ))
         }
 
-        // Check for Magisk app
+        // Check for Magisk app packages
         val magiskPackages = listOf(
             "com.topjohnwu.magisk",
             "io.github.huskydg.magisk",
@@ -84,7 +103,13 @@ class MagiskDetector(private val context: Context) : RootDetectorInterface {
         )
     }
 
-    private fun calculateConfidence(detectionCount: Int): Float {
+    /**
+     * Calculates the confidence score based on the number of Magisk detection methods triggered.
+     *
+     * @param detectionCount The number of Magisk detection methods that returned true.
+     * @return A float value (0.0 to 1.0) representing the confidence score.
+     */
+    internal fun calculateConfidence(detectionCount: Int): Float {
         return when (detectionCount) {
             0 -> 0f
             1 -> 0.4f

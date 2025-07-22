@@ -7,8 +7,17 @@ import android.provider.Settings
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
+/**
+ * Utility object for common system-related operations.
+ */
 object SystemUtils {
 
+    /**
+     * Retrieves the value of a system property.
+     *
+     * @param property The name of the system property to retrieve (e.g., "ro.build.version.release").
+     * @return The value of the system property as a String, or null if the property is not found or an error occurs.
+     */
     fun getSystemProperty(property: String): String? {
         return try {
             val process = Runtime.getRuntime().exec("getprop $property")
@@ -22,6 +31,12 @@ object SystemUtils {
         }
     }
 
+    /**
+     * Executes a shell command and returns its output.
+     *
+     * @param command The shell command to execute (e.g., "ls -l /system/bin").
+     * @return The output of the command as a String, or null if an error occurs or the output is blank.
+     */
     fun executeCommand(command: String): String? {
         return try {
             val process = Runtime.getRuntime().exec(command)
@@ -35,6 +50,13 @@ object SystemUtils {
         }
     }
 
+    /**
+     * Checks if a specific package is installed on the device.
+     *
+     * @param context The application context.
+     * @param packageName The package name to check.
+     * @return True if the package is installed, false otherwise.
+     */
     fun isPackageInstalled(context: Context, packageName: String): Boolean {
         return try {
             context.packageManager.getPackageInfo(packageName, 0)
@@ -44,6 +66,12 @@ object SystemUtils {
         }
     }
 
+    /**
+     * Retrieves a list of all installed package names on the device.
+     *
+     * @param context The application context.
+     * @return A list of package names as Strings, or an empty list if an error occurs.
+     */
     fun getInstalledPackages(context: Context): List<String> {
         return try {
             context.packageManager.getInstalledPackages(0)
@@ -53,6 +81,12 @@ object SystemUtils {
         }
     }
 
+    /**
+     * Checks if USB debugging is currently enabled on the device.
+     *
+     * @param context The application context.
+     * @return True if debugging is enabled, false otherwise.
+     */
     fun isDebuggingEnabled(context: Context): Boolean {
         return Settings.Secure.getInt(
             context.contentResolver,
@@ -60,6 +94,11 @@ object SystemUtils {
         ) == 1
     }
 
+    /**
+     * Retrieves the kernel version of the Android device.
+     *
+     * @return The kernel version as a String, or null if it cannot be retrieved.
+     */
     fun getKernelVersion(): String? {
         return try {
             val process = Runtime.getRuntime().exec("cat /proc/version")
@@ -73,6 +112,11 @@ object SystemUtils {
         }
     }
 
+    /**
+     * Retrieves various build information about the device.
+     *
+     * @return A Map containing build properties like model, manufacturer, brand, etc.
+     */
     fun getBuildInfo(): Map<String, String> {
         return mapOf(
             "model" to Build.MODEL,

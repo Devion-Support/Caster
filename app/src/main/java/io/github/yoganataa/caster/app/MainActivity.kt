@@ -52,7 +52,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,7 +70,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.yoganataa.caster.core.Caster
-import io.github.yoganataa.caster.core.CasterConfig
 import io.github.yoganataa.caster.core.models.CasterResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -117,33 +115,18 @@ data class DeviceInfo(
 
 // ViewModel
 class SecurityViewModel : ViewModel() {
-    private var caster: Caster? = null
     var uiState by mutableStateOf(SecurityUiState())
         private set
 
-    fun initializeCaster() {
-        if (caster != null) return
-        try {
-            val config = CasterConfig(
-                enableIntegrityChecks = true,
-                enableAntiTampering = true
-            )
-            caster = Caster(config)
-        } catch (e: Exception) {
-            uiState = uiState.copy(errorMessage = "Initialization Failed: ${e.message}")
-        }
-    }
-
     fun startSecurityScan(activity: Activity) {
-        if (caster == null) {
-            uiState = uiState.copy(errorMessage = "Caster is not initialized.")
-            return
-        }
+        // Get the singleton instance of Caster
+        val caster = Caster.getInstance()
+
         viewModelScope.launch {
             uiState = uiState.copy(isScanning = true, errorMessage = null)
             try {
                 val result = withContext(Dispatchers.IO) {
-                    caster!!.analyze(activity)
+                    caster.analyze(activity)
                 }
                 uiState = uiState.copy(isScanning = false, scanResult = result)
             } catch (e: Exception) {
@@ -167,9 +150,8 @@ fun CasterScanScreen(viewModel: SecurityViewModel = viewModel()) {
     val context = LocalContext.current
     val uiState = viewModel.uiState
 
-    LaunchedEffect(Unit) {
-        viewModel.initializeCaster()
-    }
+    // The LaunchedEffect for initialization is no longer needed
+    // as Caster is initialized in the Application class.
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(

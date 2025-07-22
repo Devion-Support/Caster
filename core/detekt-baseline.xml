@@ -1,0 +1,144 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:CasterResult.kt$CasterResult$fun generateSummary(): String</ID>
+    <ID>CyclomaticComplexMethod:EmulatorDetector.kt$EmulatorDetector$private fun checkBuildProperties(detectedMethods: MutableList&lt;String&gt;, threats: MutableList&lt;ThreatInfo&gt;): Float</ID>
+    <ID>CyclomaticComplexMethod:MaliciousAppDetector.kt$MaliciousAppDetector$suspend fun detectMaliciousApps(): MaliciousAppResult</ID>
+    <ID>ImplicitDefaultLocale:CasterResult.kt$CasterResult$String.format("%.1f", emulatorResult.confidence * 100)</ID>
+    <ID>ImplicitDefaultLocale:CasterResult.kt$CasterResult$String.format("%.1f", rootResult.confidence * 100)</ID>
+    <ID>InstanceOfCheckForException:FlagSecureDetector.kt$FlagSecureDetector$e !is InvocationTargetException</ID>
+    <ID>LongMethod:KernelSUDetector.kt$KernelSUDetector$override suspend fun detect(): RootDetectionResult</ID>
+    <ID>LongMethod:MagiskDetector.kt$MagiskDetector$override suspend fun detect(): RootDetectionResult</ID>
+    <ID>LongMethod:MaliciousAppDetector.kt$MaliciousAppDetector$suspend fun detectMaliciousApps(): MaliciousAppResult</ID>
+    <ID>LongMethod:SuperSUDetector.kt$SuperSUDetector$override suspend fun detect(): RootDetectionResult</ID>
+    <ID>LongParameterList:Caster.kt$Caster$( coreRootResult: CoreRootResult, coreEmulatorResult: CoreEmulatorResult, coreFlagSecureResult: CoreFlagSecureResult, coreMaliciousAppResult: CoreMaliciousAppResult, coreIntegrityResult: CoreIntegrityResult, coreTamperingResult: CoreTamperingResult, context: Context )</ID>
+    <ID>LongParameterList:Caster.kt$Caster$( private val config: CasterConfig = CasterConfig(), private val rootDetectorFactory: (Context) -&gt; RootDetector = { RootDetector(it) }, private val emulatorDetectorFactory: (Context) -&gt; EmulatorDetector = { EmulatorDetector(it) }, private val flagSecureDetectorFactory: (Activity) -&gt; FlagSecureDetector = { FlagSecureDetector(it) }, private val maliciousAppDetectorFactory: (Context, CasterConfig, (Context) -&gt; LsDataDetector) -&gt; MaliciousAppDetector = { context, config, lsDataDetectorFactory -&gt; MaliciousAppDetector(context, config, lsDataDetectorFactory) }, private val integrityDetectorFactory: (Context) -&gt; IntegrityDetector = { IntegrityDetector(it) }, private val antiTamperingDetectorFactory: () -&gt; AntiTamperingDetector = { AntiTamperingDetector() } )</ID>
+    <ID>LongParameterList:Caster.kt$Caster$( rootResult: CoreRootResult, emulatorResult: CoreEmulatorResult, flagSecureResult: CoreFlagSecureResult, maliciousAppsResult: CoreMaliciousAppResult, integrityResult: CoreIntegrityResult, tamperingResult: CoreTamperingResult, context: Context )</ID>
+    <ID>MagicNumber:CasterResult.kt$CasterResult$0.7f</ID>
+    <ID>MagicNumber:CasterResult.kt$CasterResult$0.9f</ID>
+    <ID>MagicNumber:CasterResult.kt$CasterResult$100</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$0.4f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$100f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$10f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$12f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$15f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$20f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$30f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$3f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$40f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$5f</ID>
+    <ID>MagicNumber:EmulatorDetector.kt$EmulatorDetector$8f</ID>
+    <ID>MagicNumber:KernelSUDetector.kt$KernelSUDetector$0.6f</ID>
+    <ID>MagicNumber:KernelSUDetector.kt$KernelSUDetector$0.8f</ID>
+    <ID>MagicNumber:LogLevel.kt$LogLevel.DEBUG$3</ID>
+    <ID>MagicNumber:LogLevel.kt$LogLevel.ERROR$6</ID>
+    <ID>MagicNumber:LogLevel.kt$LogLevel.INFO$4</ID>
+    <ID>MagicNumber:LogLevel.kt$LogLevel.WARN$5</ID>
+    <ID>MagicNumber:MagiskDetector.kt$MagiskDetector$0.4f</ID>
+    <ID>MagicNumber:MagiskDetector.kt$MagiskDetector$0.7f</ID>
+    <ID>MagicNumber:MaliciousAppDetector.kt$MaliciousAppDetector$0.2f</ID>
+    <ID>MagicNumber:MaliciousAppDetector.kt$MaliciousAppDetector$0.5f</ID>
+    <ID>MagicNumber:MaliciousAppDetector.kt$MaliciousAppDetector$0.8f</ID>
+    <ID>MagicNumber:MaliciousAppDetector.kt$MaliciousAppDetector$5</ID>
+    <ID>MagicNumber:NativeRootDetector.kt$NativeRootDetector$0.7f</ID>
+    <ID>MagicNumber:SuperSUDetector.kt$SuperSUDetector$0.5f</ID>
+    <ID>MagicNumber:SuperSUDetector.kt$SuperSUDetector$0.8f</ID>
+    <ID>MaxLineLength:AntiTamperingDetector.kt$AntiTamperingDetector$threats.add(ThreatInfo(ThreatType.CONFIGURATION_ERROR, "Native anti-tampering checks unavailable", "LOW", mapOf("reason" to "Native library 'toolChecker' failed to load")))</ID>
+    <ID>MaxLineLength:AntiTamperingDetector.kt$AntiTamperingDetector$threats.add(ThreatInfo(ThreatType.RUNTIME_ERROR, "Error during native anti-tampering checks", "HIGH", mapOf("exception" to t.javaClass.simpleName, "message" to (t.message ?: "Unknown"))))</ID>
+    <ID>MaxLineLength:Caster.kt$Caster$*</ID>
+    <ID>MaxLineLength:Caster.kt$Caster$emulatorResult = EmulatorResult(coreEmulatorResult.isEmulator, coreEmulatorResult.detectedMethods, coreEmulatorResult.confidence)</ID>
+    <ID>MaxLineLength:Caster.kt$Caster$flagSecureResult = FlagSecureResult(coreFlagSecureResult.isFlagSecureDisabled, coreFlagSecureResult.detectionMethods, coreFlagSecureResult.confidence)</ID>
+    <ID>MaxLineLength:Caster.kt$Caster$private val maliciousAppDetectorFactory: (Context, CasterConfig, (Context) -&gt; LsDataDetector) -&gt; MaliciousAppDetector = { context, config, lsDataDetectorFactory -&gt; MaliciousAppDetector(context, config, lsDataDetectorFactory) }</ID>
+    <ID>MaxLineLength:Caster.kt$Caster$return createFinalResult(rootResult, emulatorResult, flagSecureResult, maliciousAppsResult, integrityResult, tamperingResult, appContext)</ID>
+    <ID>MaxLineLength:Caster.kt$Caster$val flagSecureJob = async { flagSecureDetector?.detectFlagSecureBypass() ?: createDefaultCoreFlagSecureResult() }</ID>
+    <ID>MaxLineLength:Caster.kt$Caster$val maliciousAppDetector = if (config.enableMaliciousAppDetection) maliciousAppDetectorFactory(appContext, config, { LsDataDetector(it) }) else null</ID>
+    <ID>MaxLineLength:Caster.kt$Caster$val maliciousAppJob = async { maliciousAppDetector?.detectMaliciousApps() ?: createDefaultCoreMaliciousAppResult() }</ID>
+    <ID>MaxLineLength:CasterConfig.kt$CasterConfig$*</ID>
+    <ID>MaxLineLength:CasterResult.kt$CasterResult$appendLine(" Status: ${if (flagSecureResult.isFlagSecureDisabled) "VULNERABLE (Bypassed)" else "PROTECTED"}")</ID>
+    <ID>MaxLineLength:CasterResult.kt$CasterResult$appendLine(" Status: ${if (maliciousAppsResult.hasMaliciousApps) "${maliciousAppsResult.detectedApps.size} DETECTED" else "NONE DETECTED"}")</ID>
+    <ID>MaxLineLength:CasterResultUnitTest.kt$CasterResultUnitTest$assertTrue("Assertion failed: summary should contain '1 malicious app(s) detected'", summary[1].contains("1 malicious app(s) detected"))</ID>
+    <ID>MaxLineLength:CasterResultUnitTest.kt$CasterResultUnitTest$tamperingResult = TamperingResult(isDebuggerAttached = false, isHookingDetected = true, isFridaServerRunning = false, detectedMethods = emptyList())</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockAntiTamperingDetector.detect()).thenReturn(CoreTamperingResult(isDebuggerAttached = false, isHookingDetected = false, detectedMethods = emptyList(), threats = emptyList()))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockAntiTamperingDetector.detect()).thenReturn(CoreTamperingResult(isDebuggerAttached = false, isHookingDetected = true, detectedMethods = listOf("TestTamperingMethod"), threats = listOf(threat)))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockEmulatorDetector.detect()).thenReturn(CoreEmulatorResult(isEmulator = false, detectedMethods = emptyList(), threats = emptyList(), confidence = 0f))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockEmulatorDetector.detect()).thenReturn(CoreEmulatorResult(isEmulator = true, detectedMethods = listOf("TestEmulatorMethod"), threats = listOf(emulatorThreat), confidence = 1.0f))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockEmulatorDetector.detect()).thenReturn(CoreEmulatorResult(isEmulator = true, detectedMethods = listOf("TestEmulatorMethod"), threats = listOf(threat), confidence = 1.0f))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockFlagSecureDetector.detectFlagSecureBypass()).thenReturn(CoreFlagSecureResult(isFlagSecureDisabled = false, detectionMethods = emptyList(), threats = emptyList(), confidence = 0f))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockIntegrityDetector.detect()).thenReturn(CoreIntegrityResult(isTampered = false, detectedMethods = emptyList(), threats = emptyList()))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockIntegrityDetector.detect()).thenReturn(CoreIntegrityResult(isTampered = true, detectedMethods = listOf("Signature Mismatch"), threats = listOf(threat)))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockPackageManager.getApplicationInfo(anyString(), any(Int::class.java))).thenThrow(PackageManager.NameNotFoundException())</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockPackageManager.getApplicationInfo(eq(customApps.first()), any(Int::class.java))).thenReturn(customAppInfo)</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockPackageManager.getApplicationInfo(eq(maliciousPackage), any(Int::class.java))).thenReturn(ApplicationInfo().apply { packageName = maliciousPackage; name = maliciousPackage })</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockRootDetector.detect()).thenReturn(CoreRootResult(isRooted = false, detectedMethods = emptyList(), threats = emptyList(), confidence = 0f))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockRootDetector.detect()).thenReturn(CoreRootResult(isRooted = true, detectedMethods = listOf("TestRootMethod"), threats = listOf(rootThreat), confidence = 1.0f))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$`when`(mockRootDetector.detect()).thenReturn(CoreRootResult(isRooted = true, detectedMethods = listOf("TestRootMethod"), threats = listOf(threat), confidence = 1.0f))</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$assertEquals(RiskLevel.HIGH, result.securityReport.securityStatus.riskLevel, "Risk level should be the highest of all threats")</ID>
+    <ID>MaxLineLength:CasterUnitTest.kt$CasterUnitTest$maliciousAppDetectorFactory = { context, casterConfig, lsDataDetectorFactory -&gt; MaliciousAppDetector(context, casterConfig, lsDataDetectorFactory) }</ID>
+    <ID>MaxLineLength:EmulatorDetector.kt$EmulatorDetector$Build.BRAND?.let { b -&gt; EMULATOR_BRANDS.forEach { if(b.contains(it, true)) addDetection("Build brand: $it", 8f) } }</ID>
+    <ID>MaxLineLength:EmulatorDetector.kt$EmulatorDetector$Build.DEVICE?.let { d -&gt; EMULATOR_DEVICES.forEach { if(d.contains(it, true)) addDetection("Build device: $it", 10f) } }</ID>
+    <ID>MaxLineLength:EmulatorDetector.kt$EmulatorDetector$Build.HARDWARE?.let { h -&gt; EMULATOR_HARDWARE.forEach { if(h.contains(it, true)) addDetection("Build hardware: $it", 12f) } }</ID>
+    <ID>MaxLineLength:EmulatorDetector.kt$EmulatorDetector$Build.MANUFACTURER?.let { m -&gt; EMULATOR_MANUFACTURERS.forEach { if(m.contains(it, true)) addDetection("Build manufacturer: $it", 8f) } }</ID>
+    <ID>MaxLineLength:EmulatorDetector.kt$EmulatorDetector$Build.PRODUCT?.let { p -&gt; EMULATOR_PRODUCTS.forEach { if(p.contains(it, true)) addDetection("Build product: $it", 8f) } }</ID>
+    <ID>MaxLineLength:EmulatorDetector.kt$EmulatorDetector$threats.add(ThreatInfo(ThreatType.EMULATOR, sign, "HIGH", mapOf("property" to property, "value" to value)))</ID>
+    <ID>MaxLineLength:FileUtils.kt$FileUtils$*</ID>
+    <ID>MaxLineLength:FlagSecureDetector.kt$FlagSecureDetector$builderClass.getMethod("setUid", Long::class.javaPrimitiveType).invoke(builder, Process.myUid().toLong())</ID>
+    <ID>MaxLineLength:FlagSecureDetector.kt$FlagSecureDetector$val bitmap = Bitmap.createBitmap(VIRTUAL_DISPLAY_SIZE, VIRTUAL_DISPLAY_SIZE, Bitmap.Config.ARGB_8888)</ID>
+    <ID>MaxLineLength:FlagSecureDetector.kt$FlagSecureDetector$val layoutParams = WindowManager.LayoutParams(VIRTUAL_DISPLAY_SIZE, VIRTUAL_DISPLAY_SIZE, WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION, WindowManager.LayoutParams.FLAG_SECURE, PixelFormat.RGBA_8888)</ID>
+    <ID>MaxLineLength:FlagSecureDetector.kt$FlagSecureDetector$val surfaceControl = HiddenApiBypass.invoke(viewRootImpl::class.java, viewRootImpl, "getSurfaceControl")</ID>
+    <ID>MaxLineLength:FlagSecureDetector.kt$FlagSecureDetector$val viewRootImpl = HiddenApiBypass.invoke(activity.window.decorView::class.java, activity.window.decorView, "getViewRootImpl")</ID>
+    <ID>MaxLineLength:FlagSecureDetector.kt$FlagSecureDetector$virtualDisplay = displayManager.createVirtualDisplay("CasterVD", VIRTUAL_DISPLAY_SIZE, VIRTUAL_DISPLAY_SIZE, 1, reader.surface, 0)</ID>
+    <ID>MaxLineLength:IntegrityDetector.kt$IntegrityDetector$info.signingInfo?.apkContentsSigners?.firstOrNull() ?: info.signingInfo?.signingCertificateHistory?.firstOrNull()</ID>
+    <ID>MaxLineLength:IntegrityDetector.kt$IntegrityDetector.Companion$private const</ID>
+    <ID>MaxLineLength:MaliciousAppDetector.kt$MaliciousAppDetector$"android.permission.READ_CONTACTS"</ID>
+    <ID>MaxLineLength:MaliciousAppDetector.kt$MaliciousAppDetector$class</ID>
+    <ID>MaxLineLength:MaliciousAppDetector.kt$MaliciousAppDetector$detectionDetail = mapOf("reason" to "High number of dangerous permissions", "count" to requestedPermissions.size)</ID>
+    <ID>MaxLineLength:MaliciousAppDetector.kt$MaliciousAppDetector$private val allKnownThreats = rootManagementApps + securityBypassTools + debuggingTools + emulatorBypassTools + knownMalwareFamilies</ID>
+    <ID>MaxLineLength:RootDetector.kt$RootDetector$logger.info("Root detection complete. Rooted: $isRooted, Methods: ${allDetectedMethods.size}, Confidence: $averageConfidence")</ID>
+    <ID>NestedBlockDepth:EmulatorDetector.kt$EmulatorDetector$private fun checkSystemProperties(detectedMethods: MutableList&lt;String&gt;, threats: MutableList&lt;ThreatInfo&gt;): Float</ID>
+    <ID>NestedBlockDepth:LsDataDetector.kt$LsDataDetector$fun getPackagesFromLsData(): List&lt;String&gt;</ID>
+    <ID>NestedBlockDepth:MaliciousAppDetector.kt$MaliciousAppDetector$suspend fun detectMaliciousApps(): MaliciousAppResult</ID>
+    <ID>NewLineAtEndOfFile:AntiTamperingDetector.kt$io.github.yoganataa.caster.core.detection.tampering.AntiTamperingDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:Caster.kt$io.github.yoganataa.caster.core.Caster.kt</ID>
+    <ID>NewLineAtEndOfFile:CasterConfig.kt$io.github.yoganataa.caster.core.CasterConfig.kt</ID>
+    <ID>NewLineAtEndOfFile:CasterResult.kt$io.github.yoganataa.caster.core.models.CasterResult.kt</ID>
+    <ID>NewLineAtEndOfFile:CasterResultUnitTest.kt$io.github.yoganataa.caster.core.CasterResultUnitTest.kt</ID>
+    <ID>NewLineAtEndOfFile:CasterUnitTest.kt$io.github.yoganataa.caster.core.CasterUnitTest.kt</ID>
+    <ID>NewLineAtEndOfFile:DetectorLogicUnitTest.kt$io.github.yoganataa.caster.core.DetectorLogicUnitTest.kt</ID>
+    <ID>NewLineAtEndOfFile:EmulatorDetector.kt$io.github.yoganataa.caster.core.detection.environment.EmulatorDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:FileUtils.kt$io.github.yoganataa.caster.core.utils.FileUtils.kt</ID>
+    <ID>NewLineAtEndOfFile:FlagSecureDetector.kt$io.github.yoganataa.caster.core.detection.security.FlagSecureDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:KernelSUDetector.kt$io.github.yoganataa.caster.core.detection.root.detectors.KernelSUDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:LogLevel.kt$io.github.yoganataa.caster.core.logging.LogLevel.kt</ID>
+    <ID>NewLineAtEndOfFile:Logger.kt$io.github.yoganataa.caster.core.logging.Logger.kt</ID>
+    <ID>NewLineAtEndOfFile:LsDataDetector.kt$io.github.yoganataa.caster.core.detection.root.detectors.LsDataDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:MagiskDetector.kt$io.github.yoganataa.caster.core.detection.root.detectors.MagiskDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:MaliciousAppDetector.kt$io.github.yoganataa.caster.core.detection.app.MaliciousAppDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:NativeRootDetector.kt$io.github.yoganataa.caster.core.detection.root.detectors.NativeRootDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:RootDetector.kt$io.github.yoganataa.caster.core.detection.root.RootDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:SecurityReport.kt$io.github.yoganataa.caster.core.logging.SecurityReport.kt</ID>
+    <ID>NewLineAtEndOfFile:SuperSUDetector.kt$io.github.yoganataa.caster.core.detection.root.detectors.SuperSUDetector.kt</ID>
+    <ID>NewLineAtEndOfFile:SystemUtils.kt$io.github.yoganataa.caster.core.utils.SystemUtils.kt</ID>
+    <ID>SwallowedException:FileUtils.kt$FileUtils$e: Exception</ID>
+    <ID>SwallowedException:MaliciousAppDetector.kt$MaliciousAppDetector$e: PackageManager.NameNotFoundException</ID>
+    <ID>SwallowedException:SystemUtils.kt$SystemUtils$e: Exception</ID>
+    <ID>SwallowedException:SystemUtils.kt$SystemUtils$e: PackageManager.NameNotFoundException</ID>
+    <ID>TooGenericExceptionCaught:AntiTamperingDetector.kt$AntiTamperingDetector$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:FileUtils.kt$FileUtils$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:FlagSecureDetector.kt$FlagSecureDetector$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:IntegrityDetector.kt$IntegrityDetector$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:Logger.kt$Logger$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:LsDataDetector.kt$LsDataDetector$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MaliciousAppDetector.kt$MaliciousAppDetector$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:NativeRootDetector.kt$NativeRootDetector$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RootDetector.kt$RootDetector$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SystemUtils.kt$SystemUtils$e: Exception</ID>
+    <ID>TooManyFunctions:Caster.kt$Caster</ID>
+    <ID>UnusedPrivateProperty:LsDataDetector.kt$LsDataDetector$private val context: Context</ID>
+    <ID>UnusedPrivateProperty:NativeRootDetector.kt$NativeRootDetector$private val context: Context</ID>
+    <ID>VariableNaming:LsDataDetector.kt$LsDataDetector$private val TAG = "LsDataDetector"</ID>
+    <ID>WildcardImport:CasterResultUnitTest.kt$import io.github.yoganataa.caster.core.logging.*</ID>
+    <ID>WildcardImport:CasterResultUnitTest.kt$import io.github.yoganataa.caster.core.models.*</ID>
+    <ID>WildcardImport:RootDetector.kt$import io.github.yoganataa.caster.core.detection.root.detectors.*</ID>
+  </CurrentIssues>
+</SmellBaseline>

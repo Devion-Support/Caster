@@ -1,47 +1,57 @@
 [versions]
-# Versi Plugin
-androidGradlePlugin = "8.11.0"
-coilCompose = "3.2.0"
+# Plugin Versions
+androidGradlePlugin = "8.11.1"
 kotlin = "2.2.0"
 kotlinCompose = "2.2.0"
 composeCompiler = "1.5.11"
+ksp = "2.2.0-2.0.2"
+detekt = "1.23.8"
+lsparanoid = "0.6.0"
 
-# Versi Android SDK
+# Android SDK Versions
 compileSdk = "36"
-kotlinxCoroutinesTest = "1.10.2"
-minSdk = "29"
-mockitoCore = "5.18.0"
-mockitoInline = "5.2.0"
-mockitoKotlin = "5.4.0"
-robolectric = "4.15.1"
 targetSdk = "36"
+minSdk = "27"
 
-# Versi Library
+# Core Library Versions
 coreKtx = "1.16.0"
 lifecycle = "2.9.1"
 activityCompose = "1.10.1"
 composeBom = "2025.06.01"
 materialIconsExtended = "1.7.8"
-materialVersion = "1.12.0"
 coroutines = "1.10.2"
 okhttp = "4.12.0"
 gson = "2.13.1"
 hiddenapibypass = "6.1"
+annotation = "1.9.1"
 
-# Versi Testing
+# UI Library Versions
+coilCompose = "3.2.0"
+
+# Testing Versions
 junit = "4.13.2"
 junitExt = "1.2.1"
+junitKtx = "1.2.1"
 espressoCore = "3.6.1"
+kotlinxCoroutinesTest = "1.10.2"
+mockitoCore = "5.18.0"
+mockitoInline = "5.2.0"
+mockitoKotlin = "5.4.0"
+robolectric = "4.15.1"
 appcompat = "1.7.1"
+kotlinTest = "2.2.0"
+mockk = "1.13.10"
 
 
 [libraries]
 # AndroidX & Lifecycle
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
-# UI - Jetpack Compose
+# Compose UI
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -50,36 +60,46 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended"}
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
-kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
-material-v150 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 
 # Coroutines
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
-# Networking & JSON
+# Networking & Data
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
-mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
-mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+
+# Security & Utility
 hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hiddenapibypass" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitExt" }
+androidx-test-junit-ktx = { module = "androidx.test.ext:junit-ktx", version.ref = "junitKtx" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlinTest" }
+mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk" }
+
 
 [plugins]
-# Plugin yang digunakan di level proyek dan modul
+# Android Plugins
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+
+# Kotlin Plugins
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinCompose" }
+kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
+# Other Build Plugins
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 maven-publish = { id = "maven-publish" }
-lsparanoid = {id = "org.lsposed.lsparanoid", version = "0.6.0" }
+lsparanoid = {id = "org.lsposed.lsparanoid", version.ref = "lsparanoid" }

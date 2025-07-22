@@ -5,25 +5,33 @@ import io.github.yoganataa.caster.core.logging.ThreatInfo
 import io.github.yoganataa.caster.core.logging.ThreatType
 
 /**
- * [DISESUAIKAN] Kelas untuk mendeteksi upaya tampering, hooking, dan debugging.
- * Strukturnya diubah agar sesuai dengan pola detektor Caster,
- * namun metode deteksi native tetap sama.
+ * Detector for identifying tampering attempts, hooking frameworks, and debugger attachments.
+ *
+ * This class utilizes native checks to detect various forms of application tampering,
+ * including `tracerpid` checks, common hooking framework signatures, and Frida server presence.
  */
 class AntiTamperingDetector {
 
-    companion object {
-        init {
-            try {
-                // Memuat library native saat kelas pertama kali diakses
-                System.loadLibrary("toolChecker")
-            } catch (e: UnsatisfiedLinkError) {
-                Logger.getInstance().error("Gagal memuat native library 'toolChecker' untuk AntiTampering", e)
-            }
+    private var isNativeLibraryLoaded = false
+
+    init {
+        try {
+            // Load the native library when the class is first accessed.
+            System.loadLibrary("toolChecker")
+            isNativeLibraryLoaded = true
+        } catch (e: UnsatisfiedLinkError) {
+            Logger.getInstance().error("Failed to load native library 'toolChecker' for AntiTampering", e)
+            // Optionally, add a threat here if the library is critical
         }
     }
 
     /**
-     * Hasil dari deteksi anti-tampering.
+     * Represents the result of the anti-tampering detection.
+     *
+     * @property isDebuggerAttached True if a debugger is detected, false otherwise.
+     * @property isHookingDetected True if a hooking framework or other tampering signs are detected, false otherwise.
+     * @property threats A list of [ThreatInfo] objects, providing detailed threat information.
+     * @property detectedMethods A list of strings indicating the specific methods or signs that led to the detection.
      */
     data class Result(
         val isDebuggerAttached: Boolean,
@@ -33,14 +41,24 @@ class AntiTamperingDetector {
     )
 
     /**
-     * Fungsi utama untuk menjalankan semua pengecekan anti-tampering.
-     * Menggabungkan semua logika deteksi ke dalam satu panggilan.
+     * Performs all anti-tampering checks.
+     *
+     * This function combines all native detection logic into a single call.
+     * It checks for debugger attachment, hooking frameworks, and Frida server presence.
+     *
+     * @return A [Result] object summarizing the anti-tampering detection outcome.
      */
     fun detect(): Result {
         val threats = mutableListOf<ThreatInfo>()
         val detectedMethods = mutableListOf<String>()
         var isDebuggerAttached = false
         var isHookingDetected = false
+
+        // Check if the native library was successfully loaded
+        if (!isNativeLibraryLoaded) {
+            threats.add(ThreatInfo(ThreatType.CONFIGURATION_ERROR, "Native anti-tampering checks unavailable", "LOW", mapOf("reason" to "Native library 'toolChecker' failed to load")))
+            return Result(false, false, threats, emptyList())
+        }
 
         try {
             if (checkForTracerPid() == 1) {
@@ -61,10 +79,11 @@ class AntiTamperingDetector {
                 val sign = "Frida Server Port (27042) is Open"
                 detectedMethods.add(sign)
                 threats.add(ThreatInfo(ThreatType.TAMPERING, sign, "CRITICAL"))
-                isHookingDetected = true // Terdeteksinya Frida juga merupakan indikasi hooking/tampering
+                isHookingDetected = true // Detection of Frida also indicates hooking/tampering
             }
         } catch (t: Throwable) {
-            Logger.getInstance().error("Error saat menjalankan deteksi native anti-tampering", t)
+            Logger.getInstance().error("Error during native anti-tampering detection", t)
+            threats.add(ThreatInfo(ThreatType.RUNTIME_ERROR, "Error during native anti-tampering checks", "HIGH", mapOf("exception" to t.javaClass.simpleName, "message" to (t.message ?: "Unknown"))))
         }
 
         return Result(
@@ -76,7 +95,7 @@ class AntiTamperingDetector {
     }
 
     // ================================
-    // Deklarasi Fungsi JNI Native
+    // JNI Native Function Declarations
     // ================================
     private external fun checkForTracerPid(): Int
     private external fun checkForHookingFrameworks(): Int

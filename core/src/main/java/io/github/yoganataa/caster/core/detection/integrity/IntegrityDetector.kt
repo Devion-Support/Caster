@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.os.Build
 import android.util.Log
+import androidx.annotation.Keep
 import io.github.yoganataa.caster.core.logging.ThreatInfo
 import io.github.yoganataa.caster.core.logging.ThreatType
 import org.lsposed.lsparanoid.Obfuscate
@@ -12,31 +13,34 @@ import java.io.ByteArrayInputStream
 import java.security.MessageDigest
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
-import java.util.zip.ZipFile
 
 /**
- * [DISESUAIKAN] Kelas untuk mendeteksi integritas aplikasi Android.
- * Disesuaikan untuk menggunakan model data Caster dan pola detektor yang konsisten.
- * Metode verifikasi dan fungsi utility dipertahankan.
+ * Detector for identifying application integrity compromises.
+ *
+ * This class provides methods to verify the application's signature
+ * against expected values to detect tampering.
  */
 
 @Obfuscate
 class IntegrityDetector(private val context: Context) {
 
+    @Keep
     companion object {
         private const val TAG = "IntegrityDetector"
 
-        // [PENTING] Ganti dengan hash SHA-256 dari sertifikat RILIS Anda!
-        // Gunakan `getCurrentCertificateHash()` untuk mendapatkannya saat development.
-        private const val EXPECTED_CERTIFICATE_SHA256 = "4C:FF:C8:0F:88:C2:42:51:22:62:7C:31:E9:93:A1:7B:DA:3A:66:AC:A1:67:92:A4:D5:49:C0:2F:32:79:32:88"
-
-        // [PENTING] Ganti dengan nilai CRC32 dari `classes.dex` RILIS Anda!
-        // Gunakan `getCurrentDexCrc32()` untuk mendapatkannya saat development.
-        private const val EXPECTED_DEX_CRC32 = 0L
+        /**
+         * IMPORTANT: Replace with the SHA-256 hash of your RELEASE certificate!
+         * Use `getCurrentCertificateHash()` during development to obtain this value.
+         */
+        private const val EXPECTED_SIGNING_CERT_HASH = "4C:FF:C8:0F:88:C2:42:51:22:62:7C:31:E9:93:A1:7B:DA:3A:66:AC:A1:67:92:A4:D5:49:C0:2F:32:79:32:88"
     }
 
     /**
-     * Hasil dari deteksi integritas.
+     * Represents the result of the integrity detection.
+     *
+     * @property isTampered True if tampering is detected, false otherwise.
+     * @property threats A list of [ThreatInfo] objects, providing detailed threat information.
+     * @property detectedMethods A list of strings indicating the specific methods or signs that led to the detection.
      */
     data class Result(
         val isTampered: Boolean,
@@ -45,24 +49,21 @@ class IntegrityDetector(private val context: Context) {
     )
 
     /**
-     * Fungsi utama untuk melakukan deteksi integritas.
+     * Performs integrity detection by verifying the app's signature.
+     *
+     * Checks are only performed if the placeholder value for the certificate hash
+     * has been replaced with an actual release value.
+     *
+     * @return A [Result] object indicating whether tampering was detected.
      */
     fun detect(): Result {
         val threats = mutableListOf<ThreatInfo>()
         val detectedMethods = mutableListOf<String>()
 
-        // Hanya jalankan pengecekan jika placeholder sudah diganti untuk menghindari false positive
-        if (EXPECTED_CERTIFICATE_SHA256 != "PLACEHOLDER_CERTIFICATE_HASH_SHA256") {
+        // Only run checks if placeholder has been replaced to avoid false positives
+        if (EXPECTED_SIGNING_CERT_HASH != "PLACEHOLDER_CERTIFICATE_HASH_SHA256") {
             if (!verifyAppSignature()) {
                 val sign = "App signature mismatch"
-                detectedMethods.add(sign)
-                threats.add(ThreatInfo(ThreatType.TAMPERING, sign, "CRITICAL"))
-            }
-        }
-
-        if (EXPECTED_DEX_CRC32 != 0L) {
-            if (!verifyDexChecksum()) {
-                val sign = "DEX file checksum mismatch"
                 detectedMethods.add(sign)
                 threats.add(ThreatInfo(ThreatType.TAMPERING, sign, "CRITICAL"))
             }
@@ -71,33 +72,33 @@ class IntegrityDetector(private val context: Context) {
         return Result(threats.isNotEmpty(), threats, detectedMethods)
     }
 
+    /**
+     * Verifies the application's signature against the [EXPECTED_SIGNING_CERT_HASH].
+     *
+     * @return True if the current app signature matches the expected signature, false otherwise.
+     */
     private fun verifyAppSignature(): Boolean {
         return try {
             val currentHash = getCurrentCertificateHash()
-            Log.d(TAG, "Current cert hash: $currentHash")
-            Log.d(TAG, "Expected cert hash: $EXPECTED_CERTIFICATE_SHA256")
-            currentHash != null && currentHash.equals(EXPECTED_CERTIFICATE_SHA256, ignoreCase = true)
+            // Log only the status, not the hash values
+            if (currentHash != null && currentHash.equals(EXPECTED_SIGNING_CERT_HASH, ignoreCase = true)) {
+                Log.d(TAG, "App integrity: OK")
+                true
+            } else {
+                Log.d(TAG, "App integrity: TAMPERED")
+                false
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error verifying app signature", e)
             false
         }
     }
 
-    private fun verifyDexChecksum(): Boolean {
-        return try {
-            val currentCrc = getCurrentDexCrc32()
-            Log.d(TAG, "Current DEX CRC32: $currentCrc")
-            Log.d(TAG, "Expected DEX CRC32: $EXPECTED_DEX_CRC32")
-            currentCrc != null && currentCrc == EXPECTED_DEX_CRC32
-        } catch (e: Exception) {
-            Log.e(TAG, "Error verifying DEX checksum", e)
-            false
-        }
-    }
-
     /**
-     * Fungsi utility untuk mendapatkan hash SHA-256 dari sertifikat saat ini.
-     * Berguna untuk development - mendapatkan hash yang perlu di-hardcode.
+     * Utility function to get the SHA-256 hash of the current application's signing certificate.
+     * Useful during development to obtain the hash that needs to be hardcoded.
+     *
+     * @return The SHA-256 hash of the certificate as a colon-separated hex string, or null if an error occurs.
      */
     fun getCurrentCertificateHash(): String? {
         try {
@@ -121,27 +122,11 @@ class IntegrityDetector(private val context: Context) {
                 val cert = certFactory.generateCertificate(ByteArrayInputStream(it.toByteArray())) as X509Certificate
                 val digest = MessageDigest.getInstance("SHA-256")
                 val hash = digest.digest(cert.encoded)
-                // Konversi ke format hex dengan pemisah ':' agar mudah dibaca seperti output keytool
+                // Convert to colon-separated hex format for readability, similar to keytool output
                 hash.joinToString(":") { "%02X".format(it) }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Gagal mendapatkan hash sertifikat saat ini", e)
-            return null
-        }
-    }
-
-    /**
-     * Fungsi utility untuk mendapatkan CRC32 dari classes.dex saat ini.
-     * Berguna untuk development - mendapatkan CRC32 yang perlu di-hardcode.
-     */
-    fun getCurrentDexCrc32(): Long? {
-        try {
-            val apkPath = context.applicationInfo.sourceDir
-            ZipFile(apkPath).use {
-                return it.getEntry("classes.dex")?.crc
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Gagal mendapatkan CRC DEX saat ini", e)
+            Log.e(TAG, "Failed to get current certificate hash", e)
             return null
         }
     }

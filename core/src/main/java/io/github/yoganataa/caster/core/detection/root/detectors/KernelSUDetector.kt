@@ -9,9 +9,29 @@ import io.github.yoganataa.caster.core.utils.FileUtils
 import io.github.yoganataa.caster.core.utils.SystemUtils
 import org.lsposed.lsparanoid.Obfuscate
 
+/**
+ * Detector for identifying KernelSU root solution.
+ *
+ * This detector checks for the presence of KernelSU-specific files, installed packages,
+ * kernel modifications, and running binaries/modules.
+ *
+ * @param context The application context.
+ */
 @Obfuscate
 class KernelSUDetector(private val context: Context) : RootDetectorInterface {
 
+    /**
+     * Performs the detection for KernelSU.
+     *
+     * Checks include:
+     * - Presence of KernelSU-specific files.
+     * - Installation of known KernelSU applications.
+     * - Kernel version string for KernelSU modifications.
+     * - Presence of `ksud` binary.
+     * - Loaded KernelSU kernel modules.
+     *
+     * @return A [RootDetectionResult] indicating whether KernelSU is detected and by which methods.
+     */
     override suspend fun detect(): RootDetectionResult {
         val detectedMethods = mutableListOf<String>()
         val threats = mutableListOf<ThreatInfo>()
@@ -28,7 +48,7 @@ class KernelSUDetector(private val context: Context) : RootDetectorInterface {
             ))
         }
 
-        // Check for KernelSU app
+        // Check for KernelSU app packages
         val kernelSuPackages = listOf(
             "me.weishu.kernelsu",
             "com.rifsxd.ksunext",
@@ -46,7 +66,7 @@ class KernelSUDetector(private val context: Context) : RootDetectorInterface {
             }
         }
 
-        // Check kernel version for KernelSU modifications
+        // Check kernel version string for KernelSU modifications
         val kernelVersion = SystemUtils.getKernelVersion()
         if (kernelVersion != null && (kernelVersion.contains("KernelSU") || kernelVersion.contains("ksu"))) {
             detectedMethods.add("KernelSU kernel modification")
@@ -58,7 +78,7 @@ class KernelSUDetector(private val context: Context) : RootDetectorInterface {
             ))
         }
 
-        // Check for ksud binary
+        // Check for ksud binary presence
         if (SystemUtils.executeCommand("which ksud") != null) {
             detectedMethods.add("ksud binary found")
             threats.add(ThreatInfo(
@@ -68,7 +88,7 @@ class KernelSUDetector(private val context: Context) : RootDetectorInterface {
             ))
         }
 
-        // Check kernel module loading capability
+        // Check for KernelSU kernel module loading capability
         val lsmodResult = SystemUtils.executeCommand("lsmod")
         if (lsmodResult != null && lsmodResult.contains("kernelsu")) {
             detectedMethods.add("KernelSU module loaded")
@@ -88,7 +108,13 @@ class KernelSUDetector(private val context: Context) : RootDetectorInterface {
         )
     }
 
-    private fun calculateConfidence(detectionCount: Int): Float {
+    /**
+     * Calculates the confidence score based on the number of KernelSU detection methods triggered.
+     *
+     * @param detectionCount The number of KernelSU detection methods that returned true.
+     * @return A float value (0.0 to 1.0) representing the confidence score.
+     */
+    internal fun calculateConfidence(detectionCount: Int): Float {
         return when (detectionCount) {
             0 -> 0f
             1 -> 0.6f

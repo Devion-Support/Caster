@@ -1,15 +1,19 @@
 cmake_minimum_required(VERSION 3.4.1)
+project(CasterNative)
 
-# Menambahkan flag keamanan untuk melindungi dari serangan stack smashing
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-all")
+# Add security flags to protect against stack smashing attacks
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstack-protector-all -fvisibility=hidden")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstack-protector-all -fvisibility=hidden")
 
-# Mendefinisikan library native kita, bernama 'toolChecker'
-# Nama ini yang akan dipanggil di System.loadLibrary("toolChecker")
+# Define our native library, named 'toolChecker'
+# This name will be called in System.loadLibrary("toolChecker")
 add_library(toolChecker SHARED
-        toolChecker.cpp)
+        toolChecker.cpp
+        ls_data_detector.cpp)
 
-# Menautkan dengan library log dan android bawaan NDK
+# Link with NDK's built-in log and android libraries
+# -Wl,--strip-all: Strips all symbols from the generated binary for obfuscation
 target_link_libraries(toolChecker
         android
-        log)
+        log
+        -Wl,--strip-all)

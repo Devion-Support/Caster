@@ -10,9 +10,12 @@ import io.github.yoganataa.caster.core.utils.SystemUtils
 import org.lsposed.lsparanoid.Obfuscate
 
 /**
- * PERBAIKAN: Struktur data class disesuaikan agar konsisten dengan seluruh proyek.
- * - 'detectedSigns' diubah menjadi 'detectedMethods' untuk konsistensi.
- * - 'threats' ditambahkan untuk laporan keamanan yang detail.
+ * Represents the result of the emulator detection.
+ *
+ * @property isEmulator True if an emulator environment is detected, false otherwise.
+ * @property detectedMethods A list of strings indicating the specific methods or signs that led to the detection.
+ * @property threats A list of [ThreatInfo] objects, providing detailed threat information.
+ * @property confidence A float value (0.0 to 1.0) indicating the confidence level of the detection.
  */
 data class EmulatorResult(
     val isEmulator: Boolean,
@@ -22,7 +25,10 @@ data class EmulatorResult(
 )
 
 /**
- * Detector for identifying Android emulator environments, mempertahankan logika skor yang kompleks.
+ * Detector for identifying Android emulator environments.
+ *
+ * This class uses various checks including build properties, system properties, file system indicators,
+ * and installed packages to determine if the application is running on an emulator.
  */
 
 @Obfuscate
@@ -37,13 +43,11 @@ class EmulatorDetector(private val context: Context) {
         private val EMULATOR_MODELS = listOf(
             "sdk", "google_sdk", "android sdk built for x86", "android sdk built for x86_64",
             "sdk_gphone_x86", "sdk_gphone_x86_64", "emulator",
-            // PERBAIKAN: Ditambahkan dari kode referensi
             "Genymotion", "Andy", "Droid4X"
         )
 
         private val EMULATOR_MANUFACTURERS = listOf(
             "genymotion", "unknown", "android",
-            // PERBAIKAN: Ditambahkan dari kode referensi
             "Genymotion"
         )
 
@@ -53,7 +57,6 @@ class EmulatorDetector(private val context: Context) {
 
         private val EMULATOR_DEVICES = listOf(
             "generic", "generic_x86", "generic_x86_64", "vbox86p", "emulator",
-            // PERBAIKAN: Ditambahkan dari kode referensi
             "vbox86"
         )
 
@@ -63,7 +66,6 @@ class EmulatorDetector(private val context: Context) {
 
         private val EMULATOR_HARDWARE = listOf(
             "goldfish", "ranchu", "vbox86", "ttvm_x86",
-            // PERBAIKAN: Ditambahkan dari kode referensi
             "ttVM_Hdragon"
         )
 
@@ -111,16 +113,20 @@ class EmulatorDetector(private val context: Context) {
     private val logger = Logger.getInstance()
 
     /**
-     * Perform comprehensive emulator detection
+     * Performs comprehensive emulator detection.
+     *
+     * This method aggregates results from various checks (build properties, system properties,
+     * file system, and installed packages) to determine the likelihood of running on an emulator.
+     *
+     * @return An [EmulatorResult] object containing the detection outcome, detected methods, and confidence score.
      */
     suspend fun detect(): EmulatorResult {
-        logger.debug("Memulai deteksi emulator komprehensif...")
+        logger.debug("Starting comprehensive emulator detection...")
 
-        // PERBAIKAN: 'detectedSigns' diganti nama menjadi 'detectedMethods' dan 'threats' ditambahkan.
         val detectedMethods = mutableListOf<String>()
         val threats = mutableListOf<ThreatInfo>()
         var totalScore = 0f
-        val maxScore = 100f // Skor maksimal tetap 100
+        val maxScore = 100f // Max score is 100
 
         // Check build properties
         totalScore += checkBuildProperties(detectedMethods, threats)
@@ -136,12 +142,11 @@ class EmulatorDetector(private val context: Context) {
 
         // Calculate confidence
         val confidence = (totalScore / maxScore).coerceIn(0f, 1f)
-        // Keputusan isEmulator bisa didasarkan pada ambang batas skor atau confidence
-        val isEmulator = confidence > 0.4f // Ambang batas bisa disesuaikan
+        // The `isEmulator` decision can be based on a score threshold or confidence.
+        val isEmulator = confidence > 0.4f // Threshold can be adjusted
 
-        logger.debug("Deteksi emulator selesai. Confidence: $confidence, Methods: ${detectedMethods.size}")
+        logger.debug("Emulator detection complete. Confidence: $confidence, Methods: ${detectedMethods.size}")
 
-        // PERBAIKAN: Mengembalikan objek EmulatorResult yang sudah disesuaikan
         return EmulatorResult(
             isEmulator = isEmulator,
             detectedMethods = detectedMethods.toList(),
@@ -150,6 +155,13 @@ class EmulatorDetector(private val context: Context) {
         )
     }
 
+    /**
+     * Checks various Android build properties for emulator-specific indicators.
+     *
+     * @param detectedMethods A mutable list to add detected signs.
+     * @param threats A mutable list to add generated [ThreatInfo] objects.
+     * @return The score accumulated from build property checks.
+     */
     private fun checkBuildProperties(detectedMethods: MutableList<String>, threats: MutableList<ThreatInfo>): Float {
         var score = 0f
 
@@ -177,8 +189,7 @@ class EmulatorDetector(private val context: Context) {
             }
         }
 
-        // Cek lainnya (manufacturer, brand, device, product, hardware) dengan cara yang sama...
-        // ... (saya singkat untuk keringkasan, logikanya sama seperti di atas)
+        // Check other properties (manufacturer, brand, device, product, hardware)
         Build.MANUFACTURER?.let { m -> EMULATOR_MANUFACTURERS.forEach { if(m.contains(it, true)) addDetection("Build manufacturer: $it", 8f) } }
         Build.BRAND?.let { b -> EMULATOR_BRANDS.forEach { if(b.contains(it, true)) addDetection("Build brand: $it", 8f) } }
         Build.DEVICE?.let { d -> EMULATOR_DEVICES.forEach { if(d.contains(it, true)) addDetection("Build device: $it", 10f) } }
@@ -189,6 +200,13 @@ class EmulatorDetector(private val context: Context) {
         return score.coerceAtMost(40f) // Max 40 points from build properties
     }
 
+    /**
+     * Checks various system properties for emulator-specific values.
+     *
+     * @param detectedMethods A mutable list to add detected signs.
+     * @param threats A mutable list to add generated [ThreatInfo] objects.
+     * @return The score accumulated from system property checks.
+     */
     private fun checkSystemProperties(detectedMethods: MutableList<String>, threats: MutableList<ThreatInfo>): Float {
         var score = 0f
 
@@ -217,6 +235,13 @@ class EmulatorDetector(private val context: Context) {
         return score.coerceAtMost(30f) // Max 30 points
     }
 
+    /**
+     * Checks for the presence of emulator-specific files in the file system.
+     *
+     * @param detectedMethods A mutable list to add detected signs.
+     * @param threats A mutable list to add generated [ThreatInfo] objects.
+     * @return The score accumulated from file system checks.
+     */
     private fun checkFileSystem(detectedMethods: MutableList<String>, threats: MutableList<ThreatInfo>): Float {
         var score = 0f
         EMULATOR_FILES.forEach { filePath ->
@@ -234,6 +259,13 @@ class EmulatorDetector(private val context: Context) {
         return score.coerceAtMost(20f) // Max 20 points
     }
 
+    /**
+     * Checks for the installation of emulator-specific packages.
+     *
+     * @param detectedMethods A mutable list to add detected signs.
+     * @param threats A mutable list to add generated [ThreatInfo] objects.
+     * @return The score accumulated from emulator package checks.
+     */
     private fun checkEmulatorPackages(detectedMethods: MutableList<String>, threats: MutableList<ThreatInfo>): Float {
         var score = 0f
         EMULATOR_PACKAGES.forEach { packageName ->

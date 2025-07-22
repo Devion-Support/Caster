@@ -1,0 +1,114 @@
+package io.github.yoganataa.caster.core
+
+import io.github.yoganataa.caster.core.logging.*
+import io.github.yoganataa.caster.core.models.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class CasterResultUnitTest {
+
+    /**
+     * Helper function untuk membuat CasterResult dalam kondisi "aman" sebagai dasar pengujian.
+     * Ini menyelesaikan error "No value passed for parameter" dengan memastikan semua field terisi.
+     */
+    private fun createSecureCasterResult(): CasterResult {
+        val securityStatus = SecurityStatus(
+            isRooted = false, isEmulator = false, flagSecureDisabled = false,
+            maliciousAppsDetected = false, isTampered = false, isDebuggerAttached = false,
+            riskLevel = RiskLevel.LOW
+        )
+        val deviceInfo = DeviceInfo("model", "manufacturer", "12", 31, "kernel")
+        val securityReport = SecurityReport(
+            deviceInfo = deviceInfo,
+            securityStatus = securityStatus,
+            appPackage = "com.test.app"
+        )
+
+        return CasterResult(
+            rootResult = RootResult(isRooted = false, emptyList(), 0f),
+            emulatorResult = EmulatorResult(isEmulator = false, emptyList(), 0f),
+            flagSecureResult = FlagSecureResult(isFlagSecureDisabled = false, emptyList(), 0f),
+            maliciousAppsResult = MaliciousAppsResult(hasMaliciousApps = false, emptyList(), 0f),
+            integrityResult = IntegrityResult(isTampered = false, emptyList()),
+            tamperingResult = TamperingResult(false, false, false, emptyList()),
+            securityReport = securityReport
+        )
+    }
+
+    @Test
+    fun casterResult_isSecure_isTrue_whenNoThreats() {
+        // Menggunakan objek dasar yang sudah aman
+        val result = createSecureCasterResult()
+        assertTrue(result.isSecure)
+        assertEquals(ThreatLevel.NONE, result.threatLevel)
+    }
+
+    @Test
+    fun casterResult_isSecure_isFalse_whenRooted() {
+        // Mulai dari objek aman, lalu ubah hanya bagian rootResult
+        val result = createSecureCasterResult().copy(
+            rootResult = RootResult(isRooted = true, listOf("su binary found"), 0.8f)
+        )
+        assertFalse(result.isSecure)
+    }
+
+    @Test
+    fun threatLevel_isCritical_whenHighConfidenceRoot() {
+        // Mulai dari objek aman, ubah hanya rootResult dengan confidence tinggi
+        val result = createSecureCasterResult().copy(
+            rootResult = RootResult(isRooted = true, listOf("su binary found"), 0.95f)
+        )
+        assertEquals(ThreatLevel.CRITICAL, result.threatLevel)
+    }
+
+    @Test
+    fun threatLevel_isHigh_whenRooted() {
+        // Mulai dari objek aman, ubah hanya rootResult dengan confidence sedang
+        val result = createSecureCasterResult().copy(
+            rootResult = RootResult(isRooted = true, listOf("su binary found"), 0.8f)
+        )
+        assertEquals(ThreatLevel.HIGH, result.threatLevel)
+    }
+
+    @Test
+    fun threatLevel_isMedium_whenEmulatorIsFound() {
+        val result = createSecureCasterResult().copy(
+            emulatorResult = EmulatorResult(isEmulator = true, listOf("generic build"), 0.6f)
+        )
+        assertEquals(ThreatLevel.MEDIUM, result.threatLevel)
+    }
+
+    @Test
+    fun totalIssuesDetected_isCorrect() {
+        // Mulai dari objek aman, lalu aktifkan beberapa ancaman
+        val result = createSecureCasterResult().copy(
+            rootResult = RootResult(isRooted = true, emptyList(), 0.5f),
+            emulatorResult = EmulatorResult(isEmulator = true, emptyList(), 0.8f),
+            tamperingResult = TamperingResult(isDebuggerAttached = false, isHookingDetected = true, isFridaServerRunning = false, detectedMethods = emptyList())
+        )
+        // Ditemukan 3 isu: isRooted, isEmulator, isHookingDetected
+        assertEquals(3, result.totalIssuesDetected)
+    }
+
+    @Test
+    fun threatSummary_generatesCorrectListOfStrings() {
+        val result = createSecureCasterResult().copy(
+            rootResult = RootResult(isRooted = true, emptyList(), 0.81f),
+            maliciousAppsResult = MaliciousAppsResult(
+                hasMaliciousApps = true,
+                detectedApps = listOf(MaliciousAppInfo("com.bad.app", "Bad App", "Malware", "HIGH")),
+                riskScore = 0.8f
+            )
+        )
+        val summary = result.threatSummary
+
+        // Total ringkasan ancaman ada 2 (root dan aplikasi berbahaya)
+        assertEquals(2, summary.size)
+        // Ringkasan pertama adalah tentang root
+        assertTrue(summary[0].contains("Device is rooted (confidence: 81.0%)"))
+        // Ringkasan kedua adalah tentang aplikasi berbahaya, jumlahnya 1
+        assertTrue("Assertion failed: summary should contain '1 malicious app(s) detected'", summary[1].contains("1 malicious app(s) detected"))
+    }
+}

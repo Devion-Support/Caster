@@ -9,16 +9,23 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
 /**
- * Interface yang harus diimplementasikan oleh semua kelas detektor root.
- * Dipindahkan ke top-level agar bisa diakses dari file lain.
+ * Interface that all root detector classes must implement.
  */
 interface RootDetectorInterface {
+    /**
+     * Performs the root detection and returns the result.
+     * @return A [RootDetectionResult] indicating whether root is detected and by which methods.
+     */
     suspend fun detect(): RootDetectionResult
 }
 
 /**
- * Data class untuk hasil deteksi root.
- * Dipindahkan ke top-level agar bisa diakses dari file lain.
+ * Data class representing the result of a root detection.
+ *
+ * @property isRooted True if root is detected, false otherwise.
+ * @property detectedMethods A list of strings indicating the specific methods or signs that led to the detection.
+ * @property threats A list of [ThreatInfo] objects, providing detailed threat information.
+ * @property confidence A float value (0.0 to 1.0) indicating the confidence level of the detection.
  */
 data class RootDetectionResult(
     val isRooted: Boolean,
@@ -28,12 +35,17 @@ data class RootDetectionResult(
 )
 
 /**
- * Kelas utama yang mengorkestrasi semua detektor root.
+ * Main class that orchestrates all root detectors.
+ *
+ * This class runs multiple root detection checks (e.g., Magisk, SuperSU, KernelSU, Native checks)
+ * and aggregates their results to provide a comprehensive root detection outcome.
+ *
+ * @param context The application context.
  */
 class RootDetector(private val context: Context) {
     private val logger = Logger.getInstance()
 
-    // Sekarang semua kelas detektor akan cocok dengan tipe RootDetectorInterface
+    // All detector classes now conform to the RootDetectorInterface type
     private val detectors: List<RootDetectorInterface> = listOf(
         MagiskDetector(context),
         SuperSUDetector(context),
@@ -41,6 +53,15 @@ class RootDetector(private val context: Context) {
         NativeRootDetector(context)
     )
 
+    /**
+     * Performs a comprehensive root detection by running all configured detectors.
+     *
+     * This method executes each detector in parallel and aggregates their results.
+     * The overall `isRooted` status is true if any detector reports root.
+     * The confidence score is an average of positive confidence scores from individual detectors.
+     *
+     * @return A [RootDetectionResult] summarizing the root detection outcome.
+     */
     suspend fun detect(): RootDetectionResult = coroutineScope {
         logger.info("Starting comprehensive root detection")
 
@@ -50,7 +71,7 @@ class RootDetector(private val context: Context) {
                     detector.detect()
                 } catch (e: Exception) {
                     logger.error("Error in ${detector.javaClass.simpleName}", e)
-                    // Membuat hasil default jika ada error pada salah satu detektor
+                    // Create a default result if there's an error in one of the detectors
                     RootDetectionResult(false, emptyList(), emptyList(), 0f)
                 }
             }
@@ -60,7 +81,7 @@ class RootDetector(private val context: Context) {
         val allThreats = results.flatMap { it.threats }
         val isRooted = results.any { it.isRooted }
 
-        // Menghitung rata-rata confidence hanya dari detektor yang memberikan hasil positif
+        // Calculate average confidence only from detectors that provided a positive result
         val positiveConfidenceScores = results.filter { it.confidence > 0 }.map { it.confidence }
         val averageConfidence = if (positiveConfidenceScores.isNotEmpty()) {
             positiveConfidenceScores.average().toFloat()

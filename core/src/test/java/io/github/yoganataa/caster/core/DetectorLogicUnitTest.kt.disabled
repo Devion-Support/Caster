@@ -1,0 +1,89 @@
+package io.github.yoganataa.caster.core
+
+import android.content.Context
+import io.github.yoganataa.caster.core.detection.app.MaliciousAppDetector
+import io.github.yoganataa.caster.core.detection.root.detectors.KernelSUDetector
+import io.github.yoganataa.caster.core.detection.root.detectors.LsDataDetector
+import io.github.yoganataa.caster.core.detection.root.detectors.MagiskDetector
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.junit.MockitoJUnitRunner
+
+/**
+ * Menggunakan MockitoJUnitRunner untuk mengaktifkan mocking secara otomatis.
+ */
+@RunWith(MockitoJUnitRunner::class)
+class DetectorLogicUnitTest {
+
+    /**
+     * @Mock akan membuat objek Context palsu (mock) sebelum setiap tes dijalankan.
+     */
+    @Mock
+    private lateinit var mockContext: Context
+
+    @Mock
+    private lateinit var mockLsDataDetector: LsDataDetector
+
+    private lateinit var maliciousAppDetector: MaliciousAppDetector
+    private lateinit var kernelSUDetector: KernelSUDetector
+    private lateinit var magiskDetector: MagiskDetector
+    private lateinit var casterConfig: CasterConfig
+
+    @Before
+    fun setup() {
+        // Inisialisasi CasterConfig dengan nilai default atau sesuai kebutuhan tes
+        casterConfig = CasterConfig()
+
+        // Inisialisasi semua detector dengan context palsu yang tidak null
+        maliciousAppDetector = MaliciousAppDetector(mockContext, casterConfig, { mockLsDataDetector })
+        kernelSUDetector = KernelSUDetector(mockContext)
+        magiskDetector = MagiskDetector(mockContext)
+    }
+
+    @Test
+    fun maliciousAppDetector_getRiskLevel_isCorrect() {
+        assertEquals("CRITICAL", maliciousAppDetector.getRiskLevel("Known Malware Family"))
+        assertEquals("HIGH", maliciousAppDetector.getRiskLevel("Security Bypass / Virtualization"))
+        assertEquals("HIGH", maliciousAppDetector.getRiskLevel("Root Management / File Explorer"))
+        assertEquals("MEDIUM", maliciousAppDetector.getRiskLevel("Heuristic Detection"))
+        assertEquals("LOW", maliciousAppDetector.getRiskLevel("Excessive Permissions"))
+        assertEquals("LOW", maliciousAppDetector.getRiskLevel("Unknown Category"))
+    }
+
+    @Test
+    fun maliciousAppDetector_calculateRiskScore_isCorrect() {
+        val apps = listOf(
+            MaliciousAppDetector.DetectedApp("a.b.c", "App A", "Category", "LOW", false),
+            MaliciousAppDetector.DetectedApp("d.e.f", "App B", "Category", "HIGH", false)
+        )
+        val score = maliciousAppDetector.calculateRiskScore(apps)
+        assertEquals(0.8f, score)
+    }
+
+    @Test
+    fun maliciousAppDetector_calculateRiskScore_emptyList_returnsZero() {
+        val apps = emptyList<MaliciousAppDetector.DetectedApp>()
+        val score = maliciousAppDetector.calculateRiskScore(apps)
+        assertEquals(0f, score)
+    }
+
+    @Test
+    fun kernelSuDetector_calculateConfidence_isCorrect() {
+        assertEquals(0f, kernelSUDetector.calculateConfidence(0))
+        assertEquals(0.6f, kernelSUDetector.calculateConfidence(1))
+        assertEquals(0.8f, kernelSUDetector.calculateConfidence(2))
+        assertEquals(1f, kernelSUDetector.calculateConfidence(3))
+    }
+
+    @Test
+    fun magiskDetector_calculateConfidence_isCorrect() {
+        assertEquals(0f, magiskDetector.calculateConfidence(0))
+        assertEquals(0.4f, magiskDetector.calculateConfidence(1))
+        assertEquals(0.7f, magiskDetector.calculateConfidence(2))
+        assertEquals(1f, magiskDetector.calculateConfidence(3))
+    }
+}
