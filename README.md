@@ -9,6 +9,7 @@ Caster adalah sebuah library Android yang bertujuan untuk menyediakan fungsional
 - **Fungsionalitas Inti**: Menyediakan komponen dasar yang sering dibutuhkan dalam pengembangan aplikasi Android.
 - **Modular**: Dirancang sebagai modul terpisah (`core`) untuk integrasi yang mudah.
 - **Ringan**: Dioptimalkan untuk kinerja dan ukuran aplikasi yang minimal.
+- **Native Implementation**: Versi baru dengan logika deteksi yang dipindahkan ke kode native C++ untuk keamanan yang lebih baik.
 
 ## Instalasi
 
@@ -30,7 +31,9 @@ include(':app', ':core')
 
 Setelah library `core` dipublikasikan secara lokal (misalnya, dengan menjalankan `./gradlew publishToMavenLocal` di proyek Caster), Anda dapat menggunakannya di proyek Android lain di mesin Anda.
 
-1.  **Tambahkan repositori Maven lokal** ke file `settings.gradle.kts` proyek yang ingin menggunakan library:
+### Penggunaan Standar
+
+1. **Tambahkan repositori Maven lokal** ke file `settings.gradle.kts` proyek yang ingin menggunakan library:
 
     ```kotlin
     dependencyResolutionManagement {
@@ -43,7 +46,7 @@ Setelah library `core` dipublikasikan secara lokal (misalnya, dengan menjalankan
     }
     ```
 
-2.  **Tambahkan dependensi** ke modul aplikasi Anda (`app/build.gradle.kts` atau modul lain yang relevan):
+2. **Tambahkan dependensi** ke modul aplikasi Anda (`app/build.gradle.kts` atau modul lain yang relevan):
 
     ```kotlin
     dependencies {
@@ -51,21 +54,57 @@ Setelah library `core` dipublikasikan secara lokal (misalnya, dengan menjalankan
     }
     ```
 
-3.  **Contoh penggunaan kode** (ini adalah placeholder, ganti dengan fungsionalitas aktual dari library Anda):
+3. **Contoh penggunaan kode**:
 
     ```kotlin
-    // import io.github.yoganataa.caster.core.SomeClass // Ganti dengan import yang benar
-    //
-    // class MyActivity : AppCompatActivity() {
-    //     override fun onCreate(savedInstanceState: Bundle?) {
-    //         super.onCreate(savedInstanceState)
-    //         setContentView(R.layout.activity_main)
-    //
-    //         val instance = SomeClass() // Ganti dengan kelas/fungsi yang benar
-    //         instance.doSomething() // Ganti dengan metode/fungsi yang benar
-    //     }
-    // }
+    import io.github.yoganataa.caster.core.Caster
+    
+    class MyActivity : AppCompatActivity() {
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.activity_main)
+            
+            // Inisialisasi Caster di kelas Application Anda
+            // Caster.Builder(this)
+            //     .enableRootDetection(true)
+            //     .build()
+            
+            // Gunakan Caster untuk analisis keamanan
+            // val caster = Caster.getInstance()
+            // lifecycleScope.launch {
+            //     val result = caster.analyze(this@MyActivity)
+            //     // Proses hasil analisis
+            // }
+        }
+    }
     ```
+
+### Penggunaan Native Implementation (Lebih Aman)
+
+Untuk keamanan yang lebih tinggi, Anda dapat menggunakan implementasi native yang memindahkan semua logika deteksi ke kode C++:
+
+```kotlin
+import io.github.yoganataa.caster.core.CasterNative
+
+class MyActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        
+        // Inisialisasi CasterNative
+        CasterNative.Builder()
+            .enableRootDetection(true)
+            .enableEmulatorDetection(true)
+            .enableFlagSecureDetection(true)
+            .build()
+        
+        // Gunakan CasterNative untuk analisis keamanan
+        val caster = CasterNative.getInstance()
+        val result = caster.analyze(this)
+        // Proses hasil analisis
+    }
+}
+```
 
 ## Kontribusi
 

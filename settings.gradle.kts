@@ -21,5 +21,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Caster"
-include(":app")
-include(":core")
+include(":app", ":core", ":mbanking")
+include(":mbanking")
