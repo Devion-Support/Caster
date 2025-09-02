@@ -1,0 +1,38 @@
+# Library module specific .gitignore
+
+# Build outputs
+/build
+/release
+/debug
+
+# Generated files
+/outputs/
+/tmp/
+
+# Generated ProGuard files
+/mapping.txt
+/seeds.txt
+/unused.txt
+
+# Native binaries and compilation databases
+/.cxx/
+/obj/
+/libs/
+/src/main/libs/
+/src/main/obj/
+compile_commands.json
+
+# Local module properties
+local.properties
+
+# Generated test output
+/androidTest/
+/test/
+/jacoco/
+/reports/
+
+# Publication artifacts
+/maven-publish/
+/published/
+/publishing/
+/publications/

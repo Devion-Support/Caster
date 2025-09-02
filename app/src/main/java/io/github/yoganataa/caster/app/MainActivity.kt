@@ -69,21 +69,23 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.yoganataa.caster.core.Caster
-import io.github.yoganataa.caster.core.models.CasterResult
+import io.github.yoganataa.caster.Caster
+import io.github.yoganataa.caster.models.CasterResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
+import io.github.yoganataa.caster.ui.theme.CasterTheme
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            CasterTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = Color(0xFFF8F9FA)
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     CasterScanScreen()
                 }

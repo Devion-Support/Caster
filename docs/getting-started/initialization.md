@@ -5,13 +5,14 @@ Caster harus diinisialisasi sekali saja saat aplikasi Anda pertama kali dimulai.
 ### Mengapa di Kelas `Application`?
 
 Dengan menginisialisasi Caster di sini, Anda memastikan bahwa:
-1.  Hanya ada **satu instance** (singleton) dari Caster yang berjalan di seluruh aplikasi.
-2.  Caster siap digunakan kapan pun dan di mana pun di dalam aplikasi Anda.
+
+1. Hanya ada **satu instance** (singleton) dari Caster yang berjalan di seluruh aplikasi.
+2. Caster siap digunakan kapan pun dan di mana pun di dalam aplikasi Anda.
 
 ### Contoh Implementasi
 
-1.  Buat atau buka kelas `Application` kustom Anda.
-2.  Panggil `Caster.Builder` di dalam metode `onCreate()`.
+1. Buat atau buka kelas `Application` kustom Anda.
+2. Panggil `Caster.Builder` di dalam metode `onCreate()`.
 
 ```kotlin
 // file: app/src/main/java/com/yourpackage/MainApplication.kt
@@ -19,8 +20,8 @@ Dengan menginisialisasi Caster di sini, Anda memastikan bahwa:
 package com.yourpackage
 
 import android.app.Application
-import io.github.yoganataa.caster.core.Caster
-import io.github.yoganataa.caster.core.logging.LogLevel
+import io.github.yoganataa.caster.Caster
+import io.github.yoganataa.caster.logging.LogLevel
 
 class MainApplication : Application() {
 
@@ -35,7 +36,7 @@ class MainApplication : Application() {
 }
 ```
 
-3.  Jangan lupa untuk mendaftarkan kelas `Application` ini di `AndroidManifest.xml`:
+3. Jangan lupa untuk mendaftarkan kelas `Application` ini di `AndroidManifest.xml`:
 
 ```xml
 <application

@@ -1,1 +1,36 @@
+# App module specific .gitignore
+
+# Build outputs
 /build
+/release
+/debug
+
+# Generated files
+/outputs/
+/tmp/
+/generated/
+
+# ProGuard files
+/mapping.txt
+/seeds.txt
+/unused.txt
+
+# App-specific secrets
+/src/main/res/values/secrets.xml
+/src/debug/res/values/secrets.xml
+/src/release/res/values/secrets.xml
+
+# Keystore files
+*.jks
+*.keystore
+/keystore/
+/keystores/
+
+# Firebase configuration
+/google-services.json
+
+# Generated test output
+/androidTest/
+/test/
+/jacoco/
+/reports/

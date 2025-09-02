@@ -23,7 +23,7 @@ Tambahkan baris berikut ke blok `dependencies` di file `build.gradle.kts` level 
 ```kotlin
 dependencies {
     // ... dependensi lain
-    implementation("io.github.yoganataa.caster:core:1.0.0") // Ganti dengan versi terbaru
+    implementation("io.github.yoganataa.caster:caster:1.0.0") // Ganti dengan versi terbaru
 }
 ```
 

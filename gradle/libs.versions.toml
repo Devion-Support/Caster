@@ -1,23 +1,18 @@
 [versions]
 # Plugin Versions
-androidGradlePlugin = "8.11.1"
-kotlin = "2.2.0"
-kotlinCompose = "2.2.0"
+agp = "8.12.2"
+kotlin = "2.2.10"
+kotlinCompose = "2.2.10"
 composeCompiler = "1.5.11"
-ksp = "2.2.0-2.0.2"
+ksp = "2.2.10-2.0.2"
 detekt = "1.23.8"
 lsparanoid = "0.6.0"
 
-# Android SDK Versions
-compileSdk = "36"
-targetSdk = "36"
-minSdk = "27"
-
 # Core Library Versions
-coreKtx = "1.16.0"
-lifecycle = "2.9.2"
+coreKtx = "1.17.0"
+lifecycle = "2.9.3"
 activityCompose = "1.10.1"
-composeBom = "2025.07.00"
+composeBom = "2025.08.01"
 materialIconsExtended = "1.7.8"
 coroutines = "1.10.2"
 okhttp = "5.1.0"
@@ -26,21 +21,21 @@ hiddenapibypass = "6.1"
 annotation = "1.9.1"
 
 # UI Library Versions
-coilCompose = "3.2.0"
+coilCompose = "3.3.0"
 splashscreen = "1.0.1"
 
 # Testing Versions
 junit = "4.13.2"
-junitExt = "1.2.1"
-junitKtx = "1.2.1"
-espressoCore = "3.6.1"
+junitExt = "1.3.0"
+junitKtx = "1.3.0"
+espressoCore = "3.7.0"
 kotlinxCoroutinesTest = "1.10.2"
-mockitoCore = "5.18.0"
+mockitoCore = "5.19.0"
 mockitoInline = "5.2.0"
 mockitoKotlin = "6.0.0"
-robolectric = "4.15.1"
+robolectric = "4.16"
 appcompat = "1.7.1"
-kotlinTest = "2.2.0"
+kotlinTest = "2.2.10"
 mockk = "1.14.5"
 material = "1.12.0"
 activity = "1.10.1"
@@ -99,8 +94,8 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 
 [plugins]
 # Android Plugins
-android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
-android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
 
 # Kotlin Plugins
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

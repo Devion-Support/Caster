@@ -1,8 +1,8 @@
 package io.github.yoganataa.caster.app
 
 import android.app.Application
-import io.github.yoganataa.caster.core.Caster
-import io.github.yoganataa.caster.core.logging.LogLevel
+import io.github.yoganataa.caster.Caster
+import io.github.yoganataa.caster.logging.LogLevel
 
 class MainApplication : Application() {
 

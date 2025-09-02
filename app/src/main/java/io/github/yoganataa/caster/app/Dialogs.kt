@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
-import io.github.yoganataa.caster.core.models.*
+import io.github.yoganataa.caster.models.*
 
 // ===== Dialogs =====
 

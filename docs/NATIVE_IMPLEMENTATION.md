@@ -19,7 +19,7 @@ The native implementation follows this architecture:
 
 ### Components
 
-1. **CasterNative.kt**: The main Kotlin interface that provides the same API as the standard Caster class
+1. **Caster.kt**: The main Kotlin interface that provides the same API as the standard Caster class
 2. **CasterNativeDetector.kt**: A detector that coordinates all native detection logic
 3. **caster_detector.h/cpp**: The main C++ implementation that coordinates all detection modules
 4. **modules/**: Directory containing modular C++ implementations for each detection type
@@ -58,26 +58,21 @@ The JNI interface provides the bridge between Kotlin and C++:
 ```cpp
 // Function declarations in caster_detector.h
 JNIEXPORT jobject JNICALL
-Java_io_github_yoganataa_caster_core_detection_CasterNativeDetector_detectRoot(
+Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectRoot(
         JNIEnv *env, jobject thiz);
 
 JNIEXPORT jobject JNICALL
-Java_io_github_yoganataa_caster_core_detection_CasterNativeDetector_detectEmulator(
+Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectEmulator(
         JNIEnv *env, jobject thiz);
 ```
 
 ## Usage
 
-To use the native implementation, simply replace the standard Caster class with CasterNative:
+To use the native implementation, simply use the standard Caster class:
 
 ```kotlin
-// Standard implementation
+// Standard implementation (now using native code)
 val caster = Caster.Builder(context)
-    .enableRootDetection(true)
-    .build()
-
-// Native implementation
-val caster = CasterNative.Builder()
     .enableRootDetection(true)
     .build()
 ```

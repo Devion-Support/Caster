@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "io.github.yoganataa.caster.app"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "io.github.yoganataa.caster.app"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk = 27
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -20,6 +20,10 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        signingConfig = signingConfigs.getByName("debug")
+        testFunctionalTest = true
+        testHandleProfiling = true
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -39,17 +43,18 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlin {
-        jvmToolchain(21)
+    kotlinOptions {
+        jvmTarget = "11"
     }
 
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true
     }
 
     composeOptions {
@@ -70,11 +75,14 @@ android {
             isUniversalApk = false
         }
     }
+    
+    buildToolsVersion = "35.0.0"
+    ndkVersion = "27.0.12077973"
 }
 
 dependencies {
+    implementation(project(":lib"))
     // Project Modules
-    implementation(project(":core"))
 
     // AndroidX Core & Lifecycle
     implementation(libs.androidx.core.ktx)
