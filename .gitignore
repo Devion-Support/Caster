@@ -56,6 +56,10 @@ unused.txt
 hs_err_pid*
 replay_pid*
 
+# GitHub cache files
+.github/cache/
+.github/actions/cache/
+
 # MacOS
 .DS_Store
 .AppleDouble
