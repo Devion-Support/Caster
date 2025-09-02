@@ -1,0 +1,24 @@
+{
+  "title": "Caster Android Security Library",
+  "description": "Comprehensive documentation for the Caster Android security library",
+  "author": "Yoganataa",
+  "language": "en",
+  "root": "./",
+  "structure": {
+    "readme": "README.md",
+    "summary": "SUMMARY.md"
+  },
+  "plugins": [
+    "github",
+    "anchors",
+    "prism"
+  ],
+  "pluginsConfig": {
+    "github": {
+      "url": "https://github.com/yoganataa/caster"
+    }
+  },
+  "variables": {
+    "version": "1.0.0"
+  }
+}

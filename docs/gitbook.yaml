@@ -1,0 +1,18 @@
+# GitBook Configuration
+root: ./
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
+
+plugins:
+  - github
+  - anchors
+  - prism
+  - ga
+
+pluginsConfig:
+  github:
+    url: https://github.com/yoganataa/caster
+  ga:
+    token: UA-XXXXX-Y
