@@ -36,7 +36,7 @@ class CasterNativeDetector(
 
         return try {
             nativePerformAllDetection(context.packageName)
-        } catch (error: Throwable) {
+        } catch (error: Exception) {
             Logger.getInstance().error("Native security scan failed; returning safe defaults", error)
             defaultResult()
         }
