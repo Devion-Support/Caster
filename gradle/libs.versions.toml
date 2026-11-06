@@ -3,7 +3,7 @@
 agp = "9.5.1"
 kotlin = "2.4.21"
 kotlinCompose = "2.4.21"
-detekt = "2.0.0-alpha.6"
+detekt = "1.23.8"
 lsparanoid = "0.6.0"
 
 # AndroidX
