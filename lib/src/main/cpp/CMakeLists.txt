@@ -27,6 +27,8 @@ target_compile_options(caster_detector PRIVATE
     -ffunction-sections
     -fdata-sections
     -D_FORTIFY_SOURCE=2
+    -fno-exceptions
+    -fno-rtti
 )
 
 target_link_options(caster_detector PRIVATE
