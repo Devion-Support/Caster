@@ -226,3 +226,5 @@ Contributions are welcome! Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) f
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+<!-- Android modernization CI validation -->

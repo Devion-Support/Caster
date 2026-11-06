@@ -7,86 +7,69 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Adb
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Screenshot
-import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.yoganataa.caster.Caster
 import io.github.yoganataa.caster.models.CasterResult
+import io.github.yoganataa.caster.ui.theme.CasterTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
-
-import io.github.yoganataa.caster.ui.theme.CasterTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             CasterTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
+                Surface(modifier = Modifier.fillMaxSize()) {
                     CasterScanScreen()
                 }
             }
@@ -94,369 +77,374 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Data class untuk UI State dan Device Info
 data class SecurityUiState(
     val isScanning: Boolean = false,
     val scanResult: CasterResult? = null,
-    val errorMessage: String? = null,
-    val dialogToShow: DialogType = DialogType.None
+    val errorMessage: String? = null
 )
-
-enum class DialogType {
-    None, Overall, Root, Emulator, FlagSecure, Malicious, Integrity, Tampering
-}
 
 data class DeviceInfo(
     val deviceName: String,
     val architecture: String,
     val osVersion: String,
     val kernel: String,
-    val ramUsagePercent: Float,
-    val ramTotal: String
+    val ramUsagePercent: Float
 )
 
-// ViewModel
 class SecurityViewModel : ViewModel() {
     var uiState by mutableStateOf(SecurityUiState())
         private set
 
     fun startSecurityScan(activity: Activity) {
-        // Get the singleton instance of Caster
-        val caster = Caster.getInstance()
+        if (uiState.isScanning) return
 
         viewModelScope.launch {
             uiState = uiState.copy(isScanning = true, errorMessage = null)
-            try {
-                val result = withContext(Dispatchers.IO) {
-                    caster.analyze(activity)
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    Caster.getInstance().analyze(activity)
                 }
+            }.onSuccess { result ->
                 uiState = uiState.copy(isScanning = false, scanResult = result)
-            } catch (e: Exception) {
-                uiState = uiState.copy(isScanning = false, errorMessage = "Scan failed: ${e.message}")
+            }.onFailure { error ->
+                uiState = uiState.copy(
+                    isScanning = false,
+                    errorMessage = error.message ?: "Security scan failed"
+                )
             }
         }
     }
-
-    fun showDialog(type: DialogType) {
-        uiState = uiState.copy(dialogToShow = type)
-    }
-
-    fun onDialogDismiss() {
-        uiState = uiState.copy(dialogToShow = DialogType.None)
-    }
 }
 
-// Main Screen
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun CasterScanScreen(viewModel: SecurityViewModel = viewModel()) {
     val context = LocalContext.current
-    val uiState = viewModel.uiState
+    val state = viewModel.uiState
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
-    // The LaunchedEffect for initialization is no longer needed
-    // as Caster is initialized in the Application class.
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFF8F9FA))
-        ) {
-            Text(
-                text = "Caster Eyes",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 36.dp, bottom = 16.dp),
-                textAlign = TextAlign.Center
-            )
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp)
-            ) {
-                Spacer(modifier = Modifier.height(8.dp))
-                when {
-                    uiState.isScanning -> ScanningIndicator()
-                    uiState.scanResult != null -> {
-                        ScanResultContent(
-                            result = uiState.scanResult,
-                            context = context,
-                            onRootClick = { viewModel.showDialog(DialogType.Root) },
-                            onEmulatorClick = { viewModel.showDialog(DialogType.Emulator) },
-                            onFlagSecureClick = { viewModel.showDialog(DialogType.FlagSecure) },
-                            onMaliciousClick = { viewModel.showDialog(DialogType.Malicious) },
-                            onIntegrityClick = { viewModel.showDialog(DialogType.Integrity) },
-                            onTamperingClick = { viewModel.showDialog(DialogType.Tampering) },
-                            onOverallClick = { viewModel.showDialog(DialogType.Overall) }
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            SmallTopAppBar(
+                title = {
+                    Column {
+                        Text("Caster", fontWeight = FontWeight.SemiBold)
+                        Text(
+                            "Device security",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    else -> WelcomeMessage()
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-            }
-
-            Column(modifier = Modifier.padding(20.dp)) {
-                AnimatedVisibility(visible = uiState.errorMessage != null) {
-                    ErrorCard(uiState.errorMessage ?: "")
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-                ScanButton(
-                    uiState = uiState,
-                    onScanClick = {
-                        (context as? Activity)?.let { viewModel.startSecurityScan(it) }
-                    }
-                )
-            }
+                },
+                navigationIcon = {
+                    Icon(
+                        Icons.Default.Shield,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                },
+                scrollBehavior = scrollBehavior
+            )
         }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            when {
+                state.isScanning -> ScanningState()
+                state.scanResult == null -> WelcomeState()
+                else -> Dashboard(result = state.scanResult, context = context)
+            }
 
-        DialogHandler(uiState = uiState, onDismiss = viewModel::onDialogDismiss)
+            ScanActions(
+                state = state,
+                context = context,
+                onScan = viewModel::startSecurityScan,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }
 
 @Composable
-private fun ScanningIndicator() {
+private fun ScanActions(
+    state: SecurityUiState,
+    context: Context,
+    onScan: (Activity) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        state.errorMessage?.let {
+            ErrorBanner(it)
+            Spacer(Modifier.height(12.dp))
+        }
+
+        Button(
+            onClick = { (context as? Activity)?.let(onScan) },
+            enabled = !state.isScanning,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp)
+        ) {
+            Icon(
+                Icons.Default.Security,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(if (state.scanResult == null) "Run security scan" else "Run scan again")
+        }
+    }
+}
+
+@Composable
+private fun WelcomeState() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 100.dp),
+        modifier = Modifier.fillMaxSize().padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(64.dp),
-                color = Color(0xFF4285F4),
-                strokeWidth = 4.dp
+            Icon(
+                Icons.Default.Security,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(64.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Scanning device...", fontSize = 16.sp, color = Color(0xFF5F6368))
+            Spacer(Modifier.height(20.dp))
+            Text(
+                "Security posture",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Run a local analysis to check root, integrity, tampering, emulator state and other security signals.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
 
 @Composable
-private fun WelcomeMessage() {
+private fun ScanningState() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 100.dp),
+        modifier = Modifier.fillMaxSize().padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "Tap the scan button to start device security analysis",
-            textAlign = TextAlign.Center,
-            fontSize = 16.sp,
-            color = Color(0xFF5F6368),
-            modifier = Modifier.padding(horizontal = 32.dp)
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            androidx.compose.material3.CircularProgressIndicator()
+            Spacer(Modifier.height(20.dp))
+            Text("Analyzing device", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Native detectors are running off the UI thread.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
 @Composable
-private fun ErrorCard(errorMessage: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
-        shape = RoundedCornerShape(12.dp)
+private fun Dashboard(result: CasterResult, context: Context) {
+    val checks = securityChecks(result)
+    val secure = checks.all { it.secure }
+    val device = getDeviceInfo(context)
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = 104.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = Icons.Default.Error, contentDescription = "Error", tint = Color(0xFFD32F2F))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Error: $errorMessage", color = Color(0xFFD32F2F), fontSize = 14.sp)
+        item { PostureHeader(secure = secure, checks = checks) }
+
+        item {
+            Text(
+                "Security checks",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+            )
         }
+
+        items(checks) { check ->
+            SecurityCheckRow(check)
+        }
+
+        item { DeviceSection(device) }
     }
 }
 
+private data class SecurityCheck(
+    val title: String,
+    val summary: String,
+    val secure: Boolean,
+    val icon: ImageVector,
+)
+
+private fun securityChecks(result: CasterResult): List<SecurityCheck> = listOf(
+    SecurityCheck(
+        "Root",
+        if (result.rootResult.isRooted) "Root access detected" else "No root indicators",
+        !result.rootResult.isRooted,
+        Icons.Default.Memory,
+    ),
+    SecurityCheck(
+        "Emulator",
+        if (result.emulatorResult.isEmulator) "Emulator indicators detected" else "Physical device indicators",
+        !result.emulatorResult.isEmulator,
+        Icons.Default.PhoneAndroid,
+    ),
+    SecurityCheck(
+        "App integrity",
+        if (result.integrityResult.isTampered) "Integrity anomalies detected" else "Integrity checks passed",
+        !result.integrityResult.isTampered,
+        Icons.Default.PrivacyTip,
+    ),
+    SecurityCheck(
+        "Anti-tampering",
+        if (
+            result.tamperingResult.isDebuggerAttached ||
+            result.tamperingResult.isHookingDetected
+        ) {
+            "Debugger or hooking detected"
+        } else {
+            "No tampering indicators"
+        },
+        !result.tamperingResult.isDebuggerAttached && !result.tamperingResult.isHookingDetected,
+        Icons.Default.Warning,
+    ),
+    SecurityCheck(
+        "Malicious apps",
+        if (result.maliciousAppsResult.hasMaliciousApps) "Suspicious apps detected" else "No suspicious apps",
+        !result.maliciousAppsResult.hasMaliciousApps,
+        Icons.Default.BugReport,
+    ),
+    SecurityCheck(
+        "Screen protection",
+        if (result.flagSecureResult.isFlagSecureDisabled) "Protection is disabled" else "Protection is enabled",
+        !result.flagSecureResult.isFlagSecureDisabled,
+        Icons.Default.Screenshot,
+    )
+)
+
 @Composable
-private fun ScanButton(
-    uiState: SecurityUiState,
-    onScanClick: () -> Unit,
-) {
-    Button(
-        onClick = onScanClick,
-        enabled = !uiState.isScanning,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4285F4)),
-        shape = RoundedCornerShape(16.dp)
+private fun PostureHeader(secure: Boolean, checks: List<SecurityCheck>) {
+    val failures = checks.count { !it.secure }
+    val container = if (secure) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer
+    val content = if (secure) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onErrorContainer
+    }
+
+    Surface(
+        color = container,
+        contentColor = content,
+        shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = if (uiState.scanResult == null) "SCAN NOW" else "RE-SCAN",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
-fun ScanResultContent(
-    result: CasterResult,
-    context: Context,
-    onRootClick: () -> Unit,
-    onEmulatorClick: () -> Unit,
-    onFlagSecureClick: () -> Unit,
-    onMaliciousClick: () -> Unit,
-    onIntegrityClick: () -> Unit,
-    onTamperingClick: () -> Unit,
-    onOverallClick: () -> Unit
-) {
-    Column {
-        ScanResultGrid(
-            result = result,
-            onRootClick = onRootClick,
-            onEmulatorClick = onEmulatorClick,
-            onFlagSecureClick = onFlagSecureClick,
-            onMaliciousClick = onMaliciousClick,
-            onIntegrityClick = onIntegrityClick,
-            onTamperingClick = onTamperingClick
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        EnhancedDeviceInfoCard(context = context, onOverallClick = onOverallClick)
-    }
-}
-
-@Composable
-fun ScanResultGrid(
-    result: CasterResult,
-    onRootClick: () -> Unit,
-    onEmulatorClick: () -> Unit,
-    onFlagSecureClick: () -> Unit,
-    onMaliciousClick: () -> Unit,
-    onIntegrityClick: () -> Unit,
-    onTamperingClick: () -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        // Baris 1
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SecurityCard(
-                title = "Root Status",
-                icon = Icons.Default.Memory,
-                statusText = if (result.rootResult.isRooted) "Detected" else "Clean",
-                isSecure = !result.rootResult.isRooted,
-                onClick = onRootClick,
-                modifier = Modifier.weight(1f)
-            )
-            SecurityCard(
-                title = "Emulator",
-                icon = Icons.Default.Adb,
-                statusText = if (result.emulatorResult.isEmulator) "Detected" else "Real",
-                isSecure = !result.emulatorResult.isEmulator,
-                onClick = onEmulatorClick,
-                modifier = Modifier.weight(1f)
-            )
-        }
-        // Baris 2
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SecurityCard(
-                title = "Flag Secure",
-                icon = Icons.Default.Screenshot,
-                statusText = if (result.flagSecureResult.isFlagSecureDisabled) "Bypassed" else "Protected",
-                isSecure = !result.flagSecureResult.isFlagSecureDisabled,
-                onClick = onFlagSecureClick,
-                modifier = Modifier.weight(1f)
-            )
-            SecurityCard(
-                title = "Malicious Apps",
-                icon = Icons.Default.BugReport,
-                statusText = if (result.maliciousAppsResult.hasMaliciousApps) "Found" else "Clean",
-                isSecure = !result.maliciousAppsResult.hasMaliciousApps,
-                onClick = onMaliciousClick,
-                modifier = Modifier.weight(1f)
-            )
-        }
-        // Baris 3
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SecurityCard(
-                title = "App Integrity",
-                icon = Icons.Default.Fingerprint,
-                statusText = if (result.integrityResult.isTampered) "Compromised" else "OK",
-                isSecure = !result.integrityResult.isTampered,
-                onClick = onIntegrityClick,
-                modifier = Modifier.weight(1f)
-            )
-            SecurityCard(
-                title = "Anti-Tampering",
-                icon = Icons.Default.PrivacyTip,
-                statusText = if (result.tamperingResult.isDebuggerAttached || result.tamperingResult.isHookingDetected) "Detected" else "OK",
-                isSecure = !result.tamperingResult.isDebuggerAttached && !result.tamperingResult.isHookingDetected,
-                onClick = onTamperingClick,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-fun SecurityCard(
-    title: String,
-    icon: ImageVector,
-    statusText: String,
-    isSecure: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val statusColor = if (isSecure) Color(0xFF4CAF50) else Color(0xFFFF9800)
-    val statusIcon = if (isSecure) Icons.Default.CheckCircle else Icons.Default.Cancel
-    val cardColor = Color.White
-    val mainIconColor = if (isSecure) Color(0xFF4285F4) else Color(0xFFFF9800)
-
-    Card(
-        modifier = modifier
-            .clickable { onClick() }
-            .aspectRatio(4f / 3f),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(vertical = 12.dp, horizontal = 8.dp)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = icon,
-                contentDescription = title,
-                tint = mainIconColor,
+                if (secure) Icons.Default.CheckCircle else Icons.Default.Warning,
+                contentDescription = null,
                 modifier = Modifier.size(36.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(Modifier.size(16.dp))
+            Column(Modifier.weight(1f)) {
                 Text(
-                    text = title,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFF2E3A47),
-                    textAlign = TextAlign.Center
+                    if (secure) "Secure posture" else "Attention required",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                Text(
+                    if (secure) "No critical indicators were detected"
+                    else "$failures of ${checks.size} checks need attention",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SecurityCheckRow(check: SecurityCheck) {
+    val color = if (check.secure) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        ListItem(
+            headlineContent = { Text(check.title, fontWeight = FontWeight.Medium) },
+            supportingContent = {
+                Text(check.summary, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            },
+            leadingContent = {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Icon(
-                        imageVector = statusIcon,
+                        check.icon,
                         contentDescription = null,
-                        tint = statusColor,
-                        modifier = Modifier.size(16.dp)
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(10.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = statusText, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = statusColor)
+                }
+            },
+            trailingContent = {
+                Icon(
+                    if (check.secure) Icons.Default.CheckCircle else Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = color
+                )
+            }
+        )
+    }
+}
+
+@Composable
+private fun DeviceSection(device: DeviceInfo) {
+    Column {
+        Text(
+            "Device",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+        )
+
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(Modifier.padding(20.dp)) {
+                Text(device.deviceName, style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(12.dp))
+                DeviceLine("Android", device.osVersion)
+                DeviceLine("Architecture", device.architecture)
+                DeviceLine("Kernel", device.kernel)
+                Spacer(Modifier.height(12.dp))
+                HorizontalDivider()
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("RAM usage", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("${device.ramUsagePercent.roundToInt()}%", fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -464,174 +452,50 @@ fun SecurityCard(
 }
 
 @Composable
-fun EnhancedDeviceInfoCard(context: Context, onOverallClick: () -> Unit) {
-    val deviceInfo = remember { getRamInfo(context) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Smartphone,
-                    contentDescription = "Device",
-                    tint = Color(0xFF4285F4),
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = deviceInfo.deviceName,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A1A)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DeviceSpec("Architecture", deviceInfo.architecture)
-            DeviceSpec("OS Version", deviceInfo.osVersion)
-            DeviceSpec("Kernel", deviceInfo.kernel)
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text("RAM", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFF666666))
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${deviceInfo.ramUsagePercent.roundToInt()}% used",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2E3A47)
-                )
-                Text(
-                    text = getRAMStatus(deviceInfo.ramUsagePercent),
-                    fontSize = 12.sp,
-                    color = getRAMStatusColor(deviceInfo.ramUsagePercent)
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            val animatedProgress by animateFloatAsState(
-                targetValue = deviceInfo.ramUsagePercent / 100f,
-                animationSpec = tween(1000), label = "ramProgress"
-            )
-            LinearProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
-                color = getRAMStatusColor(deviceInfo.ramUsagePercent),
-                trackColor = Color(0xFFE0E0E0)
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            OutlinedButton(
-                onClick = onOverallClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6c757d)),
-            ) {
-                Text(
-                    text = "OVERALL RESULT",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DeviceSpec(label: String, value: String) {
+private fun DeviceLine(label: String, value: String) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = label, fontSize = 14.sp, color = Color.Gray)
-        Text(text = value, fontSize = 14.sp, color = Color(0xFF2E3A47), fontWeight = FontWeight.SemiBold, textAlign = TextAlign.End)
+        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, fontWeight = FontWeight.Medium)
     }
 }
 
 @Composable
-private fun DialogHandler(uiState: SecurityUiState, onDismiss: () -> Unit) {
-    uiState.scanResult?.let { scanResult ->
-        val dialogType = uiState.dialogToShow
-        AnimatedVisibility(
-            visible = dialogType != DialogType.None,
-            enter = fadeIn(tween(150)),
-            exit = fadeOut(tween(150))
+private fun ErrorBanner(message: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // [DIPERBAIKI] Memanggil fungsi Composable dialog yang sebenarnya
-            when (dialogType) {
-                DialogType.Overall -> OverallResultDialog(result = scanResult, onDismiss = onDismiss)
-                DialogType.Root -> RootStatusDialog(rootResult = scanResult.rootResult, onDismiss = onDismiss)
-                DialogType.Emulator -> EmulatorDetectionDialog(emulatorResult = scanResult.emulatorResult, onDismiss = onDismiss)
-                DialogType.FlagSecure -> FlagSecureDialog(flagSecureResult = scanResult.flagSecureResult, onDismiss = onDismiss)
-                DialogType.Malicious -> MaliciousAppsDialog(maliciousResult = scanResult.maliciousAppsResult, onDismiss = onDismiss)
-                DialogType.Integrity -> IntegrityDialog(integrityResult = scanResult.integrityResult, onDismiss = onDismiss)
-                DialogType.Tampering -> TamperingDialog(tamperingResult = scanResult.tamperingResult, onDismiss = onDismiss)
-                DialogType.None -> {}
-            }
+            Icon(Icons.Default.Warning, contentDescription = null)
+            Spacer(Modifier.size(10.dp))
+            Text(message, style = MaterialTheme.typography.bodySmall)
         }
     }
 }
 
-// Helper Functions
-private fun getDeviceName(): String {
-    val manufacturer = Build.MANUFACTURER.replaceFirstChar { it.uppercase() }
-    val model = Build.MODEL
-    return "$manufacturer $model"
-}
+private const val PERCENTAGE = 100.0
 
-private fun getRamInfo(context: Context): DeviceInfo {
-    val memoryInfo = ActivityManager.MemoryInfo().also {
-        (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(it)
-    }
-    val totalMemory = memoryInfo.totalMem
-    val usedMemory = totalMemory - memoryInfo.availMem
-    val usedPercentage = ((usedMemory.toDouble() / totalMemory.toDouble()) * 100).toFloat()
-    val totalGB = String.format("%.1f", totalMemory / (1024.0 * 1024.0 * 1024.0))
+private fun getDeviceInfo(context: Context): DeviceInfo {
+    val memoryInfo = ActivityManager.MemoryInfo()
+    (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(memoryInfo)
+    val total = memoryInfo.totalMem.coerceAtLeast(1L)
+    val used = total - memoryInfo.availMem
+    val usage = (used.toDouble() / total.toDouble() * PERCENTAGE).toFloat()
 
     return DeviceInfo(
-        deviceName = getDeviceName(),
+        deviceName = "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}",
         architecture = Build.SUPPORTED_ABIS.firstOrNull() ?: "Unknown",
-        osVersion = "Android ${Build.VERSION.RELEASE}",
+        osVersion = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
         kernel = System.getProperty("os.version") ?: "Unknown",
-        ramUsagePercent = usedPercentage,
-        ramTotal = totalGB
+        ramUsagePercent = usage
     )
 }
 
-private fun getRAMStatus(percentage: Float): String {
-    return when {
-        percentage < 70 -> "Optimal"
-        percentage < 90 -> "Good"
-        else -> "High"
-    }
-}
-
-private fun getRAMStatusColor(percentage: Float): Color {
-    return when {
-        percentage < 70 -> Color(0xFF4CAF50) // Green
-        percentage < 90 -> Color(0xFFFF9800) // Orange
-        else -> Color(0xFFD32F2F) // Red
-    }
-}
