@@ -83,10 +83,6 @@ data class SecurityUiState(
     val errorMessage: String? = null
 )
 
-enum class CheckType {
-    Root, Emulator, Integrity, Tampering, MaliciousApps, FlagSecure
-}
-
 data class DeviceInfo(
     val deviceName: String,
     val architecture: String,
@@ -270,64 +266,50 @@ private fun Dashboard(result: CasterResult, context: Context) {
 }
 
 private data class SecurityCheck(
-    val type: CheckType,
     val title: String,
     val summary: String,
     val secure: Boolean,
     val icon: ImageVector,
-    val detail: String
 )
 
 private fun securityChecks(result: CasterResult): List<SecurityCheck> = listOf(
     SecurityCheck(
-        CheckType.Root,
         "Root",
         if (result.rootResult.isRooted) "Root access detected" else "No root indicators",
         !result.rootResult.isRooted,
         Icons.Default.Memory,
-        detectionDetail(result.rootResult.detectedMethods, result.rootResult.confidence)
     ),
     SecurityCheck(
-        CheckType.Emulator,
         "Emulator",
         if (result.emulatorResult.isEmulator) "Emulator indicators detected" else "Physical device indicators",
         !result.emulatorResult.isEmulator,
         Icons.Default.PhoneAndroid,
-        detectionDetail(result.emulatorResult.detectedMethods, result.emulatorResult.confidence)
     ),
     SecurityCheck(
-        CheckType.Integrity,
         "App integrity",
         if (result.integrityResult.isTampered) "Integrity anomalies detected" else "Integrity checks passed",
         !result.integrityResult.isTampered,
         Icons.Default.PrivacyTip,
-        detectionDetail(result.integrityResult.detectedMethods, null)
     ),
     SecurityCheck(
-        CheckType.Tampering,
         "Anti-tampering",
         if (result.tamperingResult.isDebuggerAttached || result.tamperingResult.isHookingDetected)
             "Debugger or hooking detected"
         else "No tampering indicators",
         !result.tamperingResult.isDebuggerAttached && !result.tamperingResult.isHookingDetected,
         Icons.Default.Warning,
-        detectionDetail(result.tamperingResult.detectedMethods, null)
     ),
     SecurityCheck(
-        CheckType.MaliciousApps,
         "Malicious apps",
         if (result.maliciousAppsResult.hasMaliciousApps) "Suspicious apps detected" else "No suspicious apps",
         !result.maliciousAppsResult.hasMaliciousApps,
         Icons.Default.BugReport,
-        detectionDetail(result.maliciousAppsResult.detectedApps, result.maliciousAppsResult.riskScore)
     ),
     SecurityCheck(
-        CheckType.FlagSecure,
         "Screen protection",
         if (result.flagSecureResult.isFlagSecureDisabled) "Protection is disabled" else "Protection is enabled",
         !result.flagSecureResult.isFlagSecureDisabled,
         Icons.Default.Screenshot,
-        detectionDetail(result.flagSecureResult.detectedMethods, result.flagSecureResult.confidence)
     )
 )
 
@@ -361,7 +343,7 @@ private fun PostureHeader(secure: Boolean, checks: List<SecurityCheck>) {
                 )
                 Text(
                     if (secure) "No critical indicators were detected"
-                    else "$failures of ${{checks.size} checks need attention",
+                    else "$failures of ${checks.size} checks need attention",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -436,7 +418,7 @@ private fun DeviceSection(device: DeviceInfo) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text("RAM usage", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("${{device.ramUsagePercent.roundToInt()}%", fontWeight = FontWeight.SemiBold)
+                    Text("${device.ramUsagePercent.roundToInt()}%", fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -473,12 +455,6 @@ private fun ErrorBanner(message: String) {
     }
 }
 
-private fun detectionDetail(methods: List<String>, score: Float?): String {
-    if (methods.isEmpty()) return "No detector findings."
-    val scoreText = score?.let { "Risk/confidence: ${{(it * 100).roundToInt()}%. " } ?: ""
-    return scoreText + methods.joinToString(", ")
-}
-
 private fun getDeviceInfo(context: Context): DeviceInfo {
     val memoryInfo = ActivityManager.MemoryInfo()
     (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(memoryInfo)
@@ -487,9 +463,9 @@ private fun getDeviceInfo(context: Context): DeviceInfo {
     val usage = (used.toDouble() / total.toDouble() * 100.0).toFloat()
 
     return DeviceInfo(
-        deviceName = "${{Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${{Build.MODEL}",
+        deviceName = "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}",
         architecture = Build.SUPPORTED_ABIS.firstOrNull() ?: "Unknown",
-        osVersion = "Android ${{Build.VERSION.RELEASE} (API ${{Build.VERSION.SDK_INT})",
+        osVersion = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
         kernel = System.getProperty("os.version") ?: "Unknown",
         ramUsagePercent = usage
     )
