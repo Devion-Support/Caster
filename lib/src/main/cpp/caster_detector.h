@@ -1,28 +1,8 @@
 #ifndef CASTER_DETECTOR_H
 #define CASTER_DETECTOR_H
 
-#include <jni.h>
 #include <string>
 #include <vector>
-#include <cstring>
-#include "modules/integrity_detector.h"
-
-// Define JNI macros if not already defined
-#ifndef JNIEXPORT
-#define JNIEXPORT __attribute__ ((visibility ("default")))
-#endif
-
-#ifndef JNICALL
-#define JNICALL
-#endif
-
-// Include the necessary standard JNI macros
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// Use std::vector for safer and easier string list management.
-// These structs will be used internally by the C++ code.
 
 struct RootDetectionResult {
     bool isRooted;
@@ -48,43 +28,10 @@ struct MaliciousAppResult {
     float riskScore;
 };
 
-// This is a placeholder as the actual check is now in Kotlin.
 struct FlagSecureResult {
     bool isFlagSecureDisabled;
     std::vector<std::string> detectedMethods;
     float confidence;
 };
 
-// ================================
-// JNI Detection Functions
-// ================================
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectRoot(
-        JNIEnv *env, jobject thiz);
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectEmulator(
-        JNIEnv *env, jobject thiz);
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectIntegrity(
-        JNIEnv *env, jobject thiz, jstring packageName);
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectAntiTampering(
-        JNIEnv *env, jobject thiz);
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectMaliciousApps(
-        JNIEnv *env, jobject thiz);
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectFlagSecure(
-        JNIEnv *env, jobject thiz);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif //CASTER_DETECTOR_H
+#endif // CASTER_DETECTOR_H
