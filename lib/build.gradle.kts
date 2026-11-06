@@ -74,6 +74,12 @@ android {
 
     ndkVersion = "28.2.13676358"
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     lint {
         abortOnError = true
         checkReleaseBuilds = true
