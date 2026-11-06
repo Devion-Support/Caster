@@ -59,27 +59,27 @@ struct FlagSecureResult {
 // JNI Detection Functions
 // ================================
 
-JNIEXPORT jobject JNICALL
+jobject
 Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectRoot(
         JNIEnv *env, jobject thiz);
 
-JNIEXPORT jobject JNICALL
+jobject
 Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectEmulator(
         JNIEnv *env, jobject thiz);
 
-JNIEXPORT jobject JNICALL
+jobject
 Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectIntegrity(
         JNIEnv *env, jobject thiz, jstring packageName);
 
-JNIEXPORT jobject JNICALL
+jobject
 Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectAntiTampering(
         JNIEnv *env, jobject thiz);
 
-JNIEXPORT jobject JNICALL
+jobject
 Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectMaliciousApps(
         JNIEnv *env, jobject thiz);
 
-JNIEXPORT jobject JNICALL
+jobject
 Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectFlagSecure(
         JNIEnv *env, jobject thiz);
 
