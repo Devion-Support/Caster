@@ -339,7 +339,11 @@ private fun securityChecks(result: CasterResult): List<SecurityCheck> = listOf(
 private fun PostureHeader(secure: Boolean, checks: List<SecurityCheck>) {
     val failures = checks.count { !it.secure }
     val container = if (secure) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer
-    val content = if (secure) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
+    val content = if (secure) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onErrorContainer
+    }
 
     Surface(
         color = container,
