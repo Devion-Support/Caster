@@ -99,6 +99,7 @@ dependencies {
     testImplementation("com.google.truth:truth:1.1.3")
     testImplementation("androidx.test:core:1.5.0")
     testImplementation("androidx.test.ext:junit:1.1.5")
+    testImplementation(libs.robolectric)
     androidTestImplementation(libs.androidx.junit)
 }
 
