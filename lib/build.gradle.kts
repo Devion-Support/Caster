@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "io.github.yoganataa.caster"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 27
