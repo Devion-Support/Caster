@@ -5,6 +5,7 @@ on:
     branches: ["main", "libso", "upgrade/**"]
   pull_request:
     branches: ["main", "libso"]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -35,7 +36,7 @@ jobs:
 
       - name: Install Android build dependencies
         run: |
-          sdkmanager             "platforms;android-37.0"             "build-tools;37.0.0"             "ndk;28.2.13676358"             "cmake;3.22.1"
+          sdkmanager "platforms;android-37" "build-tools;36.0.0" "ndk;28.2.13676358" "cmake;3.22.1"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
