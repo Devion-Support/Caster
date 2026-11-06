@@ -100,12 +100,13 @@ class SecurityViewModel : ViewModel() {
 
         viewModelScope.launch {
             uiState = uiState.copy(isScanning = true, errorMessage = null)
-            try {
-                val result = withContext(Dispatchers.IO) {
+            runCatching {
+                withContext(Dispatchers.IO) {
                     Caster.getInstance().analyze(activity)
                 }
+            }.onSuccess { result ->
                 uiState = uiState.copy(isScanning = false, scanResult = result)
-            } catch (error: Exception) {
+            }.onFailure { error ->
                 uiState = uiState.copy(
                     isScanning = false,
                     errorMessage = error.message ?: "Security scan failed"
@@ -158,30 +159,46 @@ fun CasterScanScreen(viewModel: SecurityViewModel = viewModel()) {
                 else -> Dashboard(result = state.scanResult, context = context)
             }
 
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                state.errorMessage?.let {
-                    ErrorBanner(it)
-                    Spacer(Modifier.height(12.dp))
-                }
+            ScanActions(
+                state = state,
+                context = context,
+                onScan = viewModel::startSecurityScan,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
+    }
+}
 
-                Button(
-                    onClick = {
-                        (context as? Activity)?.let(viewModel::startSecurityScan)
-                    },
-                    enabled = !state.isScanning,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp)
-                ) {
-                    Icon(Icons.Default.Security, contentDescription = null, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.size(8.dp))
-                    Text(if (state.scanResult == null) "Run security scan" else "Run scan again")
-                }
-            }
+@Composable
+private fun ScanActions(
+    state: SecurityUiState,
+    context: Context,
+    onScan: (Activity) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        state.errorMessage?.let {
+            ErrorBanner(it)
+            Spacer(Modifier.height(12.dp))
+        }
+
+        Button(
+            onClick = { (context as? Activity)?.let(onScan) },
+            enabled = !state.isScanning,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp)
+        ) {
+            Icon(
+                Icons.Default.Security,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.size(8.dp))
+            Text(if (state.scanResult == null) "Run security scan" else "Run scan again")
         }
     }
 }
@@ -293,9 +310,14 @@ private fun securityChecks(result: CasterResult): List<SecurityCheck> = listOf(
     ),
     SecurityCheck(
         "Anti-tampering",
-        if (result.tamperingResult.isDebuggerAttached || result.tamperingResult.isHookingDetected)
+        if (
+            result.tamperingResult.isDebuggerAttached ||
+            result.tamperingResult.isHookingDetected
+        ) {
             "Debugger or hooking detected"
-        else "No tampering indicators",
+        } else {
+            "No tampering indicators"
+        },
         !result.tamperingResult.isDebuggerAttached && !result.tamperingResult.isHookingDetected,
         Icons.Default.Warning,
     ),
@@ -455,12 +477,14 @@ private fun ErrorBanner(message: String) {
     }
 }
 
+private const val PERCENTAGE = 100.0
+
 private fun getDeviceInfo(context: Context): DeviceInfo {
     val memoryInfo = ActivityManager.MemoryInfo()
     (context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(memoryInfo)
     val total = memoryInfo.totalMem.coerceAtLeast(1L)
     val used = total - memoryInfo.availMem
-    val usage = (used.toDouble() / total.toDouble() * 100.0).toFloat()
+    val usage = (used.toDouble() / total.toDouble() * PERCENTAGE).toFloat()
 
     return DeviceInfo(
         deviceName = "${Build.MANUFACTURER.replaceFirstChar { it.uppercase() }} ${Build.MODEL}",
@@ -470,3 +494,4 @@ private fun getDeviceInfo(context: Context): DeviceInfo {
         ramUsagePercent = usage
     )
 }
+
