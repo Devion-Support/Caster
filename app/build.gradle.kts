@@ -4,6 +4,10 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
+detekt {
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+}
+
 android {
     namespace = "io.github.yoganataa.caster.app"
     compileSdk = 37
