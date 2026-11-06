@@ -3,12 +3,17 @@ package io.github.yoganataa.caster.detection
 import android.content.Context
 import io.github.yoganataa.caster.CasterConfig
 import io.github.yoganataa.caster.logging.Logger
-import java.util.Collections
 
 /**
- * Native detector that consolidates all detection logic in C++ for enhanced security.
+ * Kotlin boundary for the native detection engine.
+ *
+ * JNI is intentionally limited to one synchronous call. Scheduling stays in Kotlin
+ * so callers never have to manage native threads or callbacks.
  */
-class CasterNativeDetector(private val context: Context, private val config: CasterConfig) {
+class CasterNativeDetector(
+    private val context: Context,
+    private val config: CasterConfig
+) {
 
     companion object {
         private var libraryLoaded = false
@@ -17,87 +22,34 @@ class CasterNativeDetector(private val context: Context, private val config: Cas
             try {
                 System.loadLibrary("caster_detector")
                 libraryLoaded = true
-            } catch (e: UnsatisfiedLinkError) {
-                Logger.getInstance().error("Failed to load native library 'caster_detector'", e)
+            } catch (error: UnsatisfiedLinkError) {
+                Logger.getInstance().error("Failed to load native library caster_detector", error)
             }
         }
     }
 
-    /**
-     * Performs all detection in a single native call.
-     */
     fun performAllDetection(): CasterDetectionResult {
         if (!libraryLoaded) {
-            Logger.getInstance().error("Native library not loaded, falling back to default implementation")
-            return createDefaultResult()
+            Logger.getInstance().error("Native library is unavailable; returning safe defaults")
+            return defaultResult()
         }
 
-        try {
-            val rootResult = if (config.enableRootDetection) detectRoot() else createDefaultRootResult()
-            val emulatorResult = if (config.enableEmulatorDetection) detectEmulator() else createDefaultEmulatorResult()
-            val packageName = context.packageName
-            val integrityResult = if (config.enableIntegrityChecks) detectIntegrity(packageName) else createDefaultIntegrityResult()
-            val antiTamperingResult = if (config.enableAntiTampering) detectAntiTampering() else createDefaultAntiTamperingResult()
-            val maliciousAppResult = if (config.enableMaliciousAppDetection) detectMaliciousApps() else createDefaultMaliciousAppResult()
-            val flagSecureResult = detectFlagSecure()
-
-            return CasterDetectionResult(
-                rootResult = rootResult,
-                emulatorResult = emulatorResult,
-                integrityResult = integrityResult,
-                antiTamperingResult = antiTamperingResult,
-                maliciousAppResult = maliciousAppResult,
-                flagSecureResult = flagSecureResult
-            )
-        } catch (e: Exception) {
-            Logger.getInstance().error("Error in native detection, falling back to default implementation", e)
-            return createDefaultResult()
+        return try {
+            nativePerformAllDetection(context.packageName)
+        } catch (error: Throwable) {
+            Logger.getInstance().error("Native security scan failed; returning safe defaults", error)
+            defaultResult()
         }
     }
 
-    /**
-     * Create default result when native detection is not available.
-     */
-    private fun createDefaultResult(): CasterDetectionResult {
-        return CasterDetectionResult(
-            rootResult = createDefaultRootResult(),
-            emulatorResult = createDefaultEmulatorResult(),
-            integrityResult = createDefaultIntegrityResult(),
-            antiTamperingResult = createDefaultAntiTamperingResult(),
-            maliciousAppResult = createDefaultMaliciousAppResult(),
-            flagSecureResult = createDefaultFlagSecureResult()
-        )
-    }
+    private fun defaultResult(): CasterDetectionResult = CasterDetectionResult(
+        rootResult = RootDetectionResult(false, emptyList(), 0f),
+        emulatorResult = EmulatorResult(false, emptyList(), 0f),
+        integrityResult = IntegrityResult(false, emptyList()),
+        antiTamperingResult = AntiTamperingResult(false, false, emptyList()),
+        maliciousAppResult = MaliciousAppResult(false, emptyList(), 0f),
+        flagSecureResult = FlagSecureResult(false, emptyList(), 0f)
+    )
 
-    private fun createDefaultRootResult(): RootDetectionResult {
-        return RootDetectionResult(false, Collections.emptyList(), 0f)
-    }
-
-    private fun createDefaultEmulatorResult(): EmulatorResult {
-        return EmulatorResult(false, Collections.emptyList(), 0f)
-    }
-
-    private fun createDefaultIntegrityResult(): IntegrityResult {
-        return IntegrityResult(false, Collections.emptyList())
-    }
-
-    private fun createDefaultAntiTamperingResult(): AntiTamperingResult {
-        return AntiTamperingResult(false, false, Collections.emptyList())
-    }
-
-    private fun createDefaultMaliciousAppResult(): MaliciousAppResult {
-        return MaliciousAppResult(false, Collections.emptyList(), 0f)
-    }
-
-    private fun createDefaultFlagSecureResult(): FlagSecureResult {
-        return FlagSecureResult(false, Collections.emptyList(), 0f)
-    }
-
-    // Native method declarations with full package name in JNI function signatures
-    private external fun detectRoot(): RootDetectionResult
-    private external fun detectEmulator(): EmulatorResult
-    private external fun detectIntegrity(packageName: String): IntegrityResult
-    private external fun detectAntiTampering(): AntiTamperingResult
-    private external fun detectMaliciousApps(): MaliciousAppResult
-    private external fun detectFlagSecure(): FlagSecureResult
+    private external fun nativePerformAllDetection(packageName: String): CasterDetectionResult
 }
