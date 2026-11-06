@@ -1,0 +1,35 @@
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+
+complexity:
+  LongMethod:
+    active: true
+  LongParameterList:
+    active: true
+
+style:
+  MagicNumber:
+    active: true
+    ignoreNumbers:
+      - 0
+      - 1
+      - 2
+      - 4
+      - 8
+      - 16
+      - 20
+      - 24
+      - 32
+      - 40
+      - 48
+      - 60
+      - 64
+      - 80
+      - 100
+      - 104
+      - 120
+      - 200
+      - 300
