@@ -1,5 +1,9 @@
-naming:
-  FunctionNaming:
-    active: true
-    ignoreAnnotated:
-      - Composable
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+
+style:
+  MagicNumber:
+    active: false
