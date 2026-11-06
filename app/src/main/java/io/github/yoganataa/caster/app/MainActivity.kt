@@ -105,7 +105,7 @@ class SecurityViewModel : ViewModel() {
         viewModelScope.launch {
             uiState = uiState.copy(isScanning = true, errorMessage = null)
             try {
-                val result = withContext(Dispatchers.Default) {
+                val result = withContext(Dispatchers.IO) {
                     Caster.getInstance().analyze(activity)
                 }
                 uiState = uiState.copy(isScanning = false, scanResult = result)
