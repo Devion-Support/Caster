@@ -96,6 +96,7 @@ dependencies {
     testImplementation(libs.mockito.inline)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
     testImplementation("com.google.truth:truth:1.1.3")
     testImplementation("androidx.test:core:1.5.0")
     testImplementation("androidx.test.ext:junit:1.1.5")

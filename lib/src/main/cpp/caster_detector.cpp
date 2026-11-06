@@ -1,167 +1,257 @@
-#include <android/log.h>
+#include "caster_detector.h"
+
+#include <jni.h>
+
 #include <string>
 #include <vector>
-#include <cstring>
-#include <jni.h>
-#include "caster_detector.h"
-#include "modules/root_detector.h"
-#include "modules/emulator_detector.h"
-#include "modules/integrity_detector.h"
+
 #include "modules/anti_tampering_detector.h"
-#include "modules/malicious_app_detector.h"
+#include "modules/emulator_detector.h"
 #include "modules/flag_secure_detector.h"
+#include "modules/integrity_detector.h"
+#include "modules/malicious_app_detector.h"
+#include "modules/root_detector.h"
 
-// Helper function to convert a C++ vector of strings to a Java List of strings
-jobject convertVectorToJavaList(JNIEnv *env, const std::vector<std::string>& vec) {
-    jclass listClass = env->FindClass("java/util/ArrayList");
-    if (!listClass) return nullptr;
-    jmethodID listConstructor = env->GetMethodID(listClass, "<init>", "()V");
-    if (!listConstructor) return nullptr;
-    jobject listObj = env->NewObject(listClass, listConstructor);
-    if (!listObj) return nullptr;
+namespace {
 
-    jmethodID addMethod = env->GetMethodID(listClass, "add", "(Ljava/lang/Object;)Z");
-    if (!addMethod) return nullptr;
-
-    for (const auto& s : vec) {
-        jstring javaString = env->NewStringUTF(s.c_str());
-        env->CallBooleanMethod(listObj, addMethod, javaString);
-        env->DeleteLocalRef(javaString);
-    }
-    return listObj;
-}
-
-extern "C" {
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectRoot(
-        JNIEnv *env, jobject thiz) {
-    RootDetectionResult result = detectRoot();
-
-    jclass resultClass = env->FindClass("io/github/yoganataa/caster/detection/RootDetectionResult");
-    if (!resultClass) return nullptr;
-    jmethodID constructor = env->GetMethodID(resultClass, "<init>", "(ZLjava/util/List;F)V");
-    if (!constructor) return nullptr;
-
-    jobject methodsList = convertVectorToJavaList(env, result.detectedMethods);
-
-    return env->NewObject(resultClass, constructor,
-                          (jboolean)result.isRooted,
-                          methodsList,
-                          (jfloat)result.confidence);
-}
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectEmulator(
-        JNIEnv *env, jobject thiz) {
-    EmulatorDetectionResult result = detectEmulator();
-
-    jclass resultClass = env->FindClass("io/github/yoganataa/caster/detection/EmulatorResult");
-    if (!resultClass) return nullptr;
-    jmethodID constructor = env->GetMethodID(resultClass, "<init>", "(ZLjava/util/List;F)V");
-    if (!constructor) return nullptr;
-
-    jobject methodsList = convertVectorToJavaList(env, result.detectedMethods);
-
-    return env->NewObject(resultClass, constructor,
-                          (jboolean)result.isEmulator,
-                          methodsList,
-                          (jfloat)result.confidence);
-}
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectIntegrity(
-        JNIEnv *env, jobject thiz, jstring packageName) {
-    const char* packageNameStr = env->GetStringUTFChars(packageName, nullptr);
-    if (!packageNameStr) return nullptr;
-    
-    IntegrityDetectionResult result = detectIntegrity(packageNameStr);
-    
-    env->ReleaseStringUTFChars(packageName, packageNameStr);
-
-    jclass resultClass = env->FindClass("io/github/yoganataa/caster/detection/IntegrityResult");
-    if (!resultClass) return nullptr;
-    jmethodID constructor = env->GetMethodID(resultClass, "<init>", "(ZLjava/util/List;)V");
-    if (!constructor) return nullptr;
-
-    jobject methodsList = convertVectorToJavaList(env, result.detectedMethods);
-
-    return env->NewObject(resultClass, constructor,
-                          (jboolean)result.isTampered,
-                          methodsList);
-}
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectAntiTampering(
-        JNIEnv *env, jobject thiz) {
-    AntiTamperingResult result = detectAntiTampering();
-
-    jclass resultClass = env->FindClass("io/github/yoganataa/caster/detection/AntiTamperingResult");
-    if (!resultClass) return nullptr;
-    jmethodID constructor = env->GetMethodID(resultClass, "<init>", "(ZZLjava/util/List;)V");
-    if (!constructor) return nullptr;
-
-    jobject methodsList = convertVectorToJavaList(env, result.detectedMethods);
-
-    return env->NewObject(resultClass, constructor,
-                          (jboolean)result.isDebuggerAttached,
-                          (jboolean)result.isHookingDetected,
-                          methodsList);
-}
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectMaliciousApps(
-        JNIEnv *env, jobject thiz) {
-    MaliciousAppResult result = detectMaliciousApps();
-
-    jclass resultClass = env->FindClass("io/github/yoganataa/caster/detection/MaliciousAppResult");
-    if (!resultClass) return nullptr;
-    jmethodID constructor = env->GetMethodID(resultClass, "<init>", "(ZLjava/util/List;F)V");
-    if (!constructor) return nullptr;
-
-    jobject appsList = convertVectorToJavaList(env, result.detectedApps);
-
-    return env->NewObject(resultClass, constructor,
-                          (jboolean)result.hasMaliciousApps,
-                          appsList,
-                          (jfloat)result.riskScore);
-}
-
-jobject
-Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectFlagSecure(
-        JNIEnv *env, jobject thiz) {
-    FlagSecureResult result = detectFlagSecure();
-
-    jclass resultClass = env->FindClass("io/github/yoganataa/caster/detection/FlagSecureResult");
-    if (!resultClass) return nullptr;
-    jmethodID constructor = env->GetMethodID(resultClass, "<init>", "(ZLjava/util/List;F)V");
-    if (!constructor) return nullptr;
-
-    jobject methodsList = convertVectorToJavaList(env, result.detectedMethods);
-
-    return env->NewObject(resultClass, constructor,
-                          (jboolean)result.isFlagSecureDisabled,
-                          methodsList,
-                          (jfloat)result.confidence);
-}
-
-jobject nativePerformAllDetection(JNIEnv* env, jobject thiz, jstring packageName) {
-    jobject root = Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectRoot(env, thiz);
-    jobject emulator = Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectEmulator(env, thiz);
-    jobject integrity = Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectIntegrity(env, thiz, packageName);
-    jobject tampering = Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectAntiTampering(env, thiz);
-    jobject malicious = Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectMaliciousApps(env, thiz);
-    jobject flagSecure = Java_io_github_yoganataa_caster_detection_CasterNativeDetector_detectFlagSecure(env, thiz);
-
-    if (root == nullptr || emulator == nullptr || integrity == nullptr ||
-        tampering == nullptr || malicious == nullptr || flagSecure == nullptr) {
+jobject toJavaStringList(JNIEnv* env, const std::vector<std::string>& values) {
+    const jclass listClass = env->FindClass("java/util/ArrayList");
+    if (listClass == nullptr) {
         return nullptr;
     }
 
-    jclass resultClass = env->FindClass("io/github/yoganataa/caster/detection/CasterDetectionResult");
-    if (resultClass == nullptr) return nullptr;
+    const jmethodID constructor = env->GetMethodID(listClass, "<init>", "()V");
+    const jmethodID add = env->GetMethodID(
+        listClass,
+        "add",
+        "(Ljava/lang/Object;)Z"
+    );
 
-    jmethodID constructor = env->GetMethodID(
+    if (constructor == nullptr || add == nullptr) {
+        return nullptr;
+    }
+
+    jobject list = env->NewObject(listClass, constructor);
+    if (list == nullptr) {
+        return nullptr;
+    }
+
+    for (const auto& value : values) {
+        jstring item = env->NewStringUTF(value.c_str());
+        if (item == nullptr) {
+            return nullptr;
+        }
+
+        env->CallBooleanMethod(list, add, item);
+        env->DeleteLocalRef(item);
+
+        if (env->ExceptionCheck()) {
+            return nullptr;
+        }
+    }
+
+    return list;
+}
+
+jobject newRootResult(JNIEnv* env, const RootDetectionResult& result) {
+    const jclass clazz = env->FindClass(
+        "io/github/yoganataa/caster/detection/RootDetectionResult"
+    );
+    if (clazz == nullptr) {
+        return nullptr;
+    }
+
+    const jmethodID constructor = env->GetMethodID(
+        clazz,
+        "<init>",
+        "(ZLjava/util/List;F)V"
+    );
+    if (constructor == nullptr) {
+        return nullptr;
+    }
+
+    return env->NewObject(
+        clazz,
+        constructor,
+        static_cast<jboolean>(result.isRooted),
+        toJavaStringList(env, result.detectedMethods),
+        static_cast<jfloat>(result.confidence)
+    );
+}
+
+jobject newEmulatorResult(JNIEnv* env, const EmulatorDetectionResult& result) {
+    const jclass clazz = env->FindClass(
+        "io/github/yoganataa/caster/detection/EmulatorResult"
+    );
+    if (clazz == nullptr) {
+        return nullptr;
+    }
+
+    const jmethodID constructor = env->GetMethodID(
+        clazz,
+        "<init>",
+        "(ZLjava/util/List;F)V"
+    );
+    if (constructor == nullptr) {
+        return nullptr;
+    }
+
+    return env->NewObject(
+        clazz,
+        constructor,
+        static_cast<jboolean>(result.isEmulator),
+        toJavaStringList(env, result.detectedMethods),
+        static_cast<jfloat>(result.confidence)
+    );
+}
+
+jobject newIntegrityResult(JNIEnv* env, const IntegrityDetectionResult& result) {
+    const jclass clazz = env->FindClass(
+        "io/github/yoganataa/caster/detection/IntegrityResult"
+    );
+    if (clazz == nullptr) {
+        return nullptr;
+    }
+
+    const jmethodID constructor = env->GetMethodID(
+        clazz,
+        "<init>",
+        "(ZLjava/util/List;)V"
+    );
+    if (constructor == nullptr) {
+        return nullptr;
+    }
+
+    return env->NewObject(
+        clazz,
+        constructor,
+        static_cast<jboolean>(result.isTampered),
+        toJavaStringList(env, result.detectedMethods)
+    );
+}
+
+jobject newAntiTamperingResult(JNIEnv* env, const AntiTamperingResult& result) {
+    const jclass clazz = env->FindClass(
+        "io/github/yoganataa/caster/detection/AntiTamperingResult"
+    );
+    if (clazz == nullptr) {
+        return nullptr;
+    }
+
+    const jmethodID constructor = env->GetMethodID(
+        clazz,
+        "<init>",
+        "(ZZLjava/util/List;)V"
+    );
+    if (constructor == nullptr) {
+        return nullptr;
+    }
+
+    return env->NewObject(
+        clazz,
+        constructor,
+        static_cast<jboolean>(result.isDebuggerAttached),
+        static_cast<jboolean>(result.isHookingDetected),
+        toJavaStringList(env, result.detectedMethods)
+    );
+}
+
+jobject newMaliciousAppResult(JNIEnv* env, const MaliciousAppResult& result) {
+    const jclass clazz = env->FindClass(
+        "io/github/yoganataa/caster/detection/MaliciousAppResult"
+    );
+    if (clazz == nullptr) {
+        return nullptr;
+    }
+
+    const jmethodID constructor = env->GetMethodID(
+        clazz,
+        "<init>",
+        "(ZLjava/util/List;F)V"
+    );
+    if (constructor == nullptr) {
+        return nullptr;
+    }
+
+    return env->NewObject(
+        clazz,
+        constructor,
+        static_cast<jboolean>(result.hasMaliciousApps),
+        toJavaStringList(env, result.detectedApps),
+        static_cast<jfloat>(result.riskScore)
+    );
+}
+
+jobject newFlagSecureResult(JNIEnv* env, const FlagSecureResult& result) {
+    const jclass clazz = env->FindClass(
+        "io/github/yoganataa/caster/detection/FlagSecureResult"
+    );
+    if (clazz == nullptr) {
+        return nullptr;
+    }
+
+    const jmethodID constructor = env->GetMethodID(
+        clazz,
+        "<init>",
+        "(ZLjava/util/List;F)V"
+    );
+    if (constructor == nullptr) {
+        return nullptr;
+    }
+
+    return env->NewObject(
+        clazz,
+        constructor,
+        static_cast<jboolean>(result.isFlagSecureDisabled),
+        toJavaStringList(env, result.detectedMethods),
+        static_cast<jfloat>(result.confidence)
+    );
+}
+
+jobject nativePerformAllDetection(
+    JNIEnv* env,
+    jobject,
+    jstring packageName
+) {
+    if (packageName == nullptr) {
+        return nullptr;
+    }
+
+    const char* packageNameChars = env->GetStringUTFChars(packageName, nullptr);
+    if (packageNameChars == nullptr) {
+        return nullptr;
+    }
+
+    const RootDetectionResult root = detectRoot();
+    const EmulatorDetectionResult emulator = detectEmulator();
+    const IntegrityDetectionResult integrity = detectIntegrity(packageNameChars);
+    const AntiTamperingResult tampering = detectAntiTampering();
+    const MaliciousAppResult maliciousApps = detectMaliciousApps();
+    const FlagSecureResult flagSecure = detectFlagSecure();
+
+    env->ReleaseStringUTFChars(packageName, packageNameChars);
+
+    jobject rootResult = newRootResult(env, root);
+    jobject emulatorResult = newEmulatorResult(env, emulator);
+    jobject integrityResult = newIntegrityResult(env, integrity);
+    jobject tamperingResult = newAntiTamperingResult(env, tampering);
+    jobject maliciousAppResult = newMaliciousAppResult(env, maliciousApps);
+    jobject flagSecureResult = newFlagSecureResult(env, flagSecure);
+
+    if (rootResult == nullptr || emulatorResult == nullptr || integrityResult == nullptr ||
+        tamperingResult == nullptr || maliciousAppResult == nullptr ||
+        flagSecureResult == nullptr) {
+        return nullptr;
+    }
+
+    const jclass resultClass = env->FindClass(
+        "io/github/yoganataa/caster/detection/CasterDetectionResult"
+    );
+    if (resultClass == nullptr) {
+        return nullptr;
+    }
+
+    const jmethodID constructor = env->GetMethodID(
         resultClass,
         "<init>",
         "(Lio/github/yoganataa/caster/detection/RootDetectionResult;"
@@ -171,19 +261,23 @@ jobject nativePerformAllDetection(JNIEnv* env, jobject thiz, jstring packageName
         "Lio/github/yoganataa/caster/detection/MaliciousAppResult;"
         "Lio/github/yoganataa/caster/detection/FlagSecureResult;)V"
     );
-    if (constructor == nullptr) return nullptr;
+    if (constructor == nullptr) {
+        return nullptr;
+    }
 
     return env->NewObject(
         resultClass,
         constructor,
-        root,
-        emulator,
-        integrity,
-        tampering,
-        malicious,
-        flagSecure
+        rootResult,
+        emulatorResult,
+        integrityResult,
+        tamperingResult,
+        maliciousAppResult,
+        flagSecureResult
     );
 }
+
+}  // namespace
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     JNIEnv* env = nullptr;
@@ -191,10 +285,12 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
         return JNI_ERR;
     }
 
-    jclass detectorClass = env->FindClass(
+    const jclass detectorClass = env->FindClass(
         "io/github/yoganataa/caster/detection/CasterNativeDetector"
     );
-    if (detectorClass == nullptr) return JNI_ERR;
+    if (detectorClass == nullptr) {
+        return JNI_ERR;
+    }
 
     static const JNINativeMethod methods[] = {
         {
@@ -208,7 +304,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
         detectorClass,
         methods,
         sizeof(methods) / sizeof(methods[0])
-    ) == JNI_OK ? JNI_VERSION_1_6 : JNI_ERR;
+    ) == JNI_OK
+        ? JNI_VERSION_1_6
+        : JNI_ERR;
 }
-
-} // extern "C"
